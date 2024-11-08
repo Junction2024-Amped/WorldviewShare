@@ -88,7 +88,6 @@ namespace WorldviewShareServer.Controllers
         public async Task<ActionResult<TopicSessionResponseDto>> PostTopicSession(TopicSessionRequestDto topicSessionDto)
         {
             var topicSession = ToTopicSession(topicSessionDto);
-            _context.TopicSessions.Add(topicSession);
             await _context.SaveChangesAsync();
 
             return CreatedAtAction("GetTopicSession", new { id = topicSession.Id }, ToTopicSessionResponseDto(topicSession));
