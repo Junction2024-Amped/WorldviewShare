@@ -22,4 +22,10 @@ public sealed class WorldviewShareContext : DbContext
     
     public DbSet<TopicSession> TopicSessions { get; set; }
     public DbSet<User> Users { get; set; }
+    
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        base.OnModelCreating(modelBuilder);
+        modelBuilder.Entity<TopicSession>().HasMany(ts => ts.Users).WithMany(u => u.TopicSessions).UsingEntity(j => j.ToTable("UserTopicSessions"));
+    }
 }
