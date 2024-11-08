@@ -41,7 +41,7 @@ namespace WorldviewShareServer.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<TopicSessionResponseDto>> GetTopicSession(Guid id)
         {
-            var topicSession = await _context.TopicSessions.FindAsync(id);
+            var topicSession = await GetTopicSessionById(id);
 
             if (topicSession == null)
             {
