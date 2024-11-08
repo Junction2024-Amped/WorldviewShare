@@ -1,6 +1,0 @@
-@WorldviewShare_HostAddress = http://localhost:5198
-
-GET {{WorldviewShare_HostAddress}}/weatherforecast/
-Accept: application/json
-
-###
