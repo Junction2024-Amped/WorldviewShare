@@ -1,6 +1,5 @@
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
-using Avalonia.Data.Core;
 using Avalonia.Data.Core.Plugins;
 using Avalonia.Markup.Xaml;
 using WorldviewShareClient.ViewModels;
@@ -8,7 +7,7 @@ using WorldviewShareClient.Views;
 
 namespace WorldviewShareClient;
 
-public partial class App : Application
+public class App : Application
 {
     public override void Initialize()
     {
@@ -24,7 +23,7 @@ public partial class App : Application
             BindingPlugins.DataValidators.RemoveAt(0);
             desktop.MainWindow = new MainWindow
             {
-                DataContext = new MainWindowViewModel(),
+                DataContext = new MainWindowViewModel()
             };
         }
 

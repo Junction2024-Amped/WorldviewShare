@@ -19,7 +19,8 @@ public static class EnvironmentHelper
 
                 _settings = new EnvironmentSettings
                 {
-                    Id = Guid.NewGuid()
+                    Id = Guid.NewGuid(),
+                    Name = string.Empty
                 };
 
                 using var writer = new StreamWriter("environment.env");
@@ -35,5 +36,11 @@ public static class EnvironmentHelper
         }
 
         return _settings;
+    }
+
+    public static void SaveEnvironment(EnvironmentSettings environmentSettings)
+    {
+        using var writer = new StreamWriter("environment.env");
+        writer.Write(JsonSerializer.Serialize(environmentSettings));
     }
 }

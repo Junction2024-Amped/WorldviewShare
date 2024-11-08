@@ -22,9 +22,9 @@
         <PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.1"/>
     </ItemGroup>
 
-   <ItemGroup>
-	<Content Include="environment.env.default">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-   </Content>
-  </ItemGroup>
+    <ItemGroup>
+        <Content Include="environment.env.default">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </Content>
+    </ItemGroup>
 </Project>
