@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using WorldviewShareServer.Data;
+using WorldviewShareServer.Dtos;
 using WorldviewShareServer.Models;
 
 namespace WorldviewShareServer.Controllers
@@ -15,35 +16,50 @@ namespace WorldviewShareServer.Controllers
         {
             _context = context;
         }
+        
+        private User ToUser(UserRequestDto userRequestDto)
+        {
+            var user = new User
+            {
+                Username = userRequestDto.Username
+            };
+            _context.Users.Add(user);
+            return user;
+        }
+        
+        private async Task<User?> GetUserById(Guid id) => await _context.Users.FindAsync(id);
+        
+        private static UserResponseDto ToUserResponseDto(User user) => new(user.Id, user.Username, user.TopicSessions.Select(ts => ts.Id).ToList());
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<User>>> GetUsers()
+        public async Task<ActionResult<IEnumerable<UserResponseDto>>> GetUsers()
         {
-            return await _context.Users.ToListAsync();
+            return await _context.Users.Select(u => ToUserResponseDto(u)).ToListAsync();
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<User>> GetUser(Guid id)
+        public async Task<ActionResult<UserResponseDto>> GetUser(Guid id)
         {
-            var user = await _context.Users.FindAsync(id);
+            var user = await GetUserById(id);
 
             if (user == null)
             {
                 return NotFound();
             }
 
-            return user;
+            return ToUserResponseDto(user);
         }
 
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutUser(Guid id, User user)
+        public async Task<IActionResult> PutUser(Guid id, UserRequestDto userDto)
         {
-            if (id != user.Id)
+            var user = await GetUserById(id);
+            if (user == null)
             {
-                return BadRequest();
+                return NotFound();
             }
-
+            user.Username = userDto.Username;
             _context.Entry(user).State = EntityState.Modified;
 
             try
@@ -67,18 +83,18 @@ namespace WorldviewShareServer.Controllers
 
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<User>> PostUser(User user)
+        public async Task<ActionResult<UserResponseDto>> PostUser(UserRequestDto userDto)
         {
-            _context.Users.Add(user);
+            var user = ToUser(userDto);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetUser", new { id = user.Id }, user);
+            return CreatedAtAction("GetUser", new { id = user.Id }, ToUserResponseDto(user));
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteUser(Guid id)
         {
-            var user = await _context.Users.FindAsync(id);
+            var user = await GetUserById(id);
             if (user == null)
             {
                 return NotFound();
