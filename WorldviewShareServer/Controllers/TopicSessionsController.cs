@@ -7,23 +7,21 @@ namespace WorldviewShareServer.Controllers
 {
     [Route("api/topics")]
     [ApiController]
-    public class TopicSessionController : ControllerBase
+    public class TopicSessionsController : ControllerBase
     {
         private readonly WorldviewShareContext _context;
 
-        public TopicSessionController(WorldviewShareContext context)
+        public TopicSessionsController(WorldviewShareContext context)
         {
             _context = context;
         }
 
-        // GET: api/TopicSession
         [HttpGet]
         public async Task<ActionResult<IEnumerable<TopicSession>>> GetTopicSessions()
         {
             return await _context.TopicSessions.ToListAsync();
         }
 
-        // GET: api/TopicSession/5
         [HttpGet("{id}")]
         public async Task<ActionResult<TopicSession>> GetTopicSession(Guid id)
         {
@@ -37,7 +35,6 @@ namespace WorldviewShareServer.Controllers
             return topicSession;
         }
 
-        // PUT: api/TopicSession/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
         public async Task<IActionResult> PutTopicSession(Guid id, TopicSession topicSession)
@@ -68,7 +65,6 @@ namespace WorldviewShareServer.Controllers
             return NoContent();
         }
 
-        // POST: api/TopicSession
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
         public async Task<ActionResult<TopicSession>> PostTopicSession(TopicSession topicSession)
@@ -79,7 +75,6 @@ namespace WorldviewShareServer.Controllers
             return CreatedAtAction("GetTopicSession", new { id = topicSession.Id }, topicSession);
         }
 
-        // DELETE: api/TopicSession/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteTopicSession(Guid id)
         {
