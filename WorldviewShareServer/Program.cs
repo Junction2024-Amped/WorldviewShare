@@ -1,3 +1,4 @@
+using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using WorldviewShareServer.Data;
 namespace WorldviewShareServer;
@@ -15,9 +16,11 @@ public class Program
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen();
         
+        SqliteConnection connection = new("DataSource=file::memory:?cache=shared"); // TODO: remove once switch to persistent DB happens
+        connection.Open();
         builder.Services.AddDbContext<WorldviewShareContext>(options =>
         {
-            options.UseInMemoryDatabase("WorldviewShare");
+            options.UseSqlite(connection);
         });
         
         builder.Services.AddControllers();
@@ -38,5 +41,7 @@ public class Program
         app.MapControllers();
         
         app.Run();
+        
+        connection.Close();
     }
 }
