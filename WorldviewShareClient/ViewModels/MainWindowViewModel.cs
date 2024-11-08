@@ -1,8 +1,8 @@
 ﻿namespace WorldviewShareClient.ViewModels;
 
-public partial class MainWindowViewModel : ViewModelBase
+public class MainWindowViewModel : ViewModelBase
 {
 #pragma warning disable CA1822 // Mark members as static
-    public string Greeting => "Welcome to Avalonia!";
+    public string Text { get; set; } = EnvironmentHelper.GetEnvironment().Id.ToString();
 #pragma warning restore CA1822 // Mark members as static
 }
