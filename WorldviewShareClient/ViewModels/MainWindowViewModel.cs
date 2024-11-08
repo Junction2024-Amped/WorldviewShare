@@ -1,6 +1,11 @@
-﻿using System.Windows.Input;
+﻿using System;
+using System.Net.Http;
+using System.Text;
+using System.Text.Json;
+using System.Windows.Input;
 using CommunityToolkit.Mvvm.Input;
 using WorldviewShareClient.Models;
+using WorldviewShareClient.Models.Users;
 
 namespace WorldviewShareClient.ViewModels;
 
@@ -64,10 +69,22 @@ public class MainWindowViewModel : ViewModelBase
         }
     }
 
-    private void CreateUser()
+    private async void CreateUser()
     {
         _environmentSettings.Name = UserInputUserName;
         UserName = _environmentSettings.Name;
         EnvironmentHelper.SaveEnvironment(_environmentSettings);
+
+        var dto = new CreateUserDto
+        {
+            Username = _environmentSettings.Name,
+            Id = _environmentSettings.Id
+        };
+
+        var test = await HttpClientFactory.GetClient()
+            .PostAsync("api/users",
+                new StringContent(JsonSerializer.Serialize(dto), Encoding.UTF8, "application/json"));
+
+        Console.WriteLine(test.Content.ReadAsStringAsync().Result);
     }
 }
