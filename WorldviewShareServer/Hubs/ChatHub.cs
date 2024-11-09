@@ -6,6 +6,7 @@ using WorldviewShareServer.Services;
 using WorldviewShareShared.DTO.Request.Messages;
 using WorldviewShareShared.DTO.Request.TopicSessions;
 using WorldviewShareShared.DTO.Request.Users;
+using WorldviewShareShared.Utils;
 using WorldviewShareShared.WebsocketClientInterfaces;
 namespace WorldviewShareServer.Hubs;
 
@@ -54,9 +55,10 @@ public class ChatHub : Hub<IChatClient>
             await Clients.Caller.RejectJoinSession("User already in session");
             return;
         }
-        _chatHubCache.ActiveUsers[topicSession] = user;
+
+        _chatHubCache.ActiveUsers.TryAdd(topicSession, user);
         await Groups.AddToGroupAsync(Context.ConnectionId, topicSession.Id.ToString());
-        await Clients.Caller.AcceptJoinSession();
+        await Clients.Caller.AcceptJoinSession(_usersService.ToUserResponseDto(_chatHubCache.ActiveUsers[topicSession]));
         topicSession.Users.Add(user);
         _topicSessionsService.SetEntityState(topicSession, EntityState.Modified);
         await _topicSessionsService.SaveChangesAsync();
@@ -86,6 +88,24 @@ public class ChatHub : Hub<IChatClient>
     {
         var message = _messagesService.ToMessage(messageDto);
         await _messagesService.SaveChangesAsync();
+        if (!_chatHubCache.Users.TryGetValue(Context.ConnectionId, out _))
+        {
+            _chatHubCache.Users[Context.ConnectionId] = message.Author;
+        }
+        if (_chatHubCache.ActiveUsers.TryGetValue(message.TopicSession, out var activeUser))
+        {
+            if (activeUser != message.Author)
+            {
+                await Clients.Caller.RejectMessage("User is not active user in session");
+                return;
+            }
+        }
+        var newActiveUser = message.TopicSession.Users.Order(new RandomComparer<User>()).FirstOrDefault(u => u != message.Author);
+        if (newActiveUser != null)
+        {
+            _chatHubCache.ActiveUsers[message.TopicSession] = newActiveUser;
+            await Clients.Group(message.TopicSessionId.ToString()).ChangeActiveUser(_usersService.ToUserResponseDto(newActiveUser));
+        }
         await Clients.Group(message.TopicSessionId.ToString()).ReceiveMessage(_messagesService.ToMessageResponseDto(message));
     }
     
