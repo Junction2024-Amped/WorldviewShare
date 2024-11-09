@@ -57,6 +57,12 @@ public class MainWindowViewModel : ViewModelBase
             .WithAutomaticReconnect()
             .Build();
 
+        connection.On<string>("RejectJoinSession", Console.WriteLine);
+        connection.On("AcceptJoinSession", () => Console.WriteLine("Accepted join session"));
+
+        connection.On<string>("RejectRegistration", Console.WriteLine);
+        connection.On("AcceptRegistration", () => Console.WriteLine("Accepted registration"));
+
         connection.StartAsync().Wait();
         connection.SendAsync("Register", new UserReferenceRequestDto(EnvironmentHelper.GetEnvironment().Id));
 
@@ -64,11 +70,6 @@ public class MainWindowViewModel : ViewModelBase
 
         var client = HttpClientFactory.GetClient();
 
-        connection.On<string>("RejectJoinSession", Console.WriteLine);
-        connection.On("AcceptJoinSession", () => Console.WriteLine("Accepted join session"));
-
-        connection.On<string>("RejectRegistration", Console.WriteLine);
-        connection.On("AcceptRegistration", () => Console.WriteLine("Accepted registration"));
 
         connection.On<MessageResponseDto>("ReceiveMessage", messageResponseDto =>
         {
@@ -93,6 +94,8 @@ public class MainWindowViewModel : ViewModelBase
                 Name = authorName
             });
         });
+
+        Task.Delay(100).Wait();
     }
 
     public ObservableCollection<MessageViewModel> Messages
@@ -167,6 +170,7 @@ public class MainWindowViewModel : ViewModelBase
 
     public async Task ChangeTopic()
     {
+        Messages.Clear();
         // TODO: Leave session if one exists
         var client = HttpClientFactory.GetClient();
 
