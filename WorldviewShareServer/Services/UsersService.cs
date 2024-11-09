@@ -1,4 +1,3 @@
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using WorldviewShareServer.Data;
 using WorldviewShareServer.Models;

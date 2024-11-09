@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using WorldviewShareServer.Data;
 using WorldviewShareServer.Models;
+using WorldviewShareServer.Services;
 using WorldviewShareShared.DTO.Request.TopicSessions;
 using WorldviewShareShared.DTO.Request.Users;
 using WorldviewShareShared.DTO.Response.TopicSessions;
@@ -12,67 +13,54 @@ namespace WorldviewShareServer.Controllers
     [ApiController]
     public class TopicSessionsController : ControllerBase
     {
-        private readonly WorldviewShareContext _context;
+        private readonly TopicSessionsService _topicSessionsService;
+        private readonly UsersService _usersService;
 
-        public TopicSessionsController(WorldviewShareContext context)
+        public TopicSessionsController(TopicSessionsService topicSessionsService, UsersService usersService)
         {
-            _context = context;
-        }
-
-        private TopicSession ToTopicSession(TopicSessionRequestDto topicSessionRequestDto)
-        {
-            var topicSession = new TopicSession
-            {
-                Name = topicSessionRequestDto.Name,
-                Topic = topicSessionRequestDto.Topic
-            };
-            _context.TopicSessions.Add(topicSession);
-            return topicSession;
+            _topicSessionsService = topicSessionsService;
+            _usersService = usersService;
         }
         
-        private async Task<TopicSession?> GetTopicSessionById(Guid id) => await _context.TopicSessions.FindAsync(id);
-        
-        private static TopicSessionResponseDto ToTopicSessionResponseDto(TopicSession topicSession) => new(topicSession.Id, topicSession.Name, topicSession.Topic, topicSession.Users.Select(u => u.Id).ToList());
-
         [HttpGet]
         public async Task<ActionResult<IEnumerable<TopicSessionResponseDto>>> GetTopicSessions()
         {
-            return await _context.TopicSessions.Select(ts => ToTopicSessionResponseDto(ts)).ToListAsync();
+            return (await _topicSessionsService.GetTopicSessions()).Select(ts => _topicSessionsService.ToTopicSessionResponseDto(ts)).ToList();
         }
 
         [HttpGet("{id}")]
         public async Task<ActionResult<TopicSessionResponseDto>> GetTopicSession(Guid id)
         {
-            var topicSession = await GetTopicSessionById(id);
+            var topicSession = await _topicSessionsService.GetTopicSessionById(id);
 
             if (topicSession == null)
             {
                 return NotFound();
             }
 
-            return ToTopicSessionResponseDto(topicSession);
+            return _topicSessionsService.ToTopicSessionResponseDto(topicSession);
         }
 
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
         public async Task<IActionResult> PutTopicSession(Guid id, TopicSessionRequestDto topicSessionDto)
         {
-            var topicSession = await GetTopicSessionById(id);
+            var topicSession = await _topicSessionsService.GetTopicSessionById(id);
             if (topicSession == null)
             {
                 return NotFound();
             }
             topicSession.Name = topicSessionDto.Name;
             topicSession.Topic = topicSessionDto.Topic;
-            _context.Entry(topicSession).State = EntityState.Modified;
+            _topicSessionsService.SetEntityState(topicSession, EntityState.Modified);
 
             try
             {
-                await _context.SaveChangesAsync();
+                await _topicSessionsService.SaveChangesAsync();
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!TopicSessionExists(id))
+                if (!_topicSessionsService.TopicSessionExists(id))
                 {
                     return NotFound();
                 }
@@ -89,21 +77,21 @@ namespace WorldviewShareServer.Controllers
         [HttpPost]
         public async Task<ActionResult<TopicSessionResponseDto>> PostTopicSession(TopicSessionRequestDto topicSessionDto)
         {
-            var topicSession = ToTopicSession(topicSessionDto);
-            await _context.SaveChangesAsync();
+            var topicSession = _topicSessionsService.ToTopicSession(topicSessionDto);
+            await _topicSessionsService.SaveChangesAsync();
 
-            return CreatedAtAction("GetTopicSession", new { id = topicSession.Id }, ToTopicSessionResponseDto(topicSession));
+            return CreatedAtAction("GetTopicSession", new { id = topicSession.Id }, _topicSessionsService.ToTopicSessionResponseDto(topicSession));
         }
         
         [HttpPatch("{id}")]
         public async Task<IActionResult> ToggleTopicParticipant(Guid id, UserReferenceRequestDto userDto)
         {
-            var topicSession = await GetTopicSessionById(id);
+            var topicSession = await _topicSessionsService.GetTopicSessionById(id);
             if (topicSession == null)
             {
                 return NotFound();
             }
-            var user = await _context.Users.FindAsync(userDto.Id);
+            var user = await _usersService.GetUserById(userDto.Id);
             if (user == null)
             {
                 return NotFound();
@@ -116,29 +104,24 @@ namespace WorldviewShareServer.Controllers
             {
                 topicSession.Users.Add(user);
             }
-            _context.Entry(topicSession).State = EntityState.Modified;
-            await _context.SaveChangesAsync();
+            _topicSessionsService.SetEntityState(topicSession, EntityState.Modified);
+            await _topicSessionsService.SaveChangesAsync();
             return NoContent();
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteTopicSession(Guid id)
         {
-            var topicSession = await GetTopicSessionById(id);
+            var topicSession = await _topicSessionsService.GetTopicSessionById(id);
             if (topicSession == null)
             {
                 return NotFound();
             }
 
-            _context.TopicSessions.Remove(topicSession);
-            await _context.SaveChangesAsync();
+            _topicSessionsService.RemoveTopicSession(topicSession);
+            await _topicSessionsService.SaveChangesAsync();
 
             return NoContent();
-        }
-
-        private bool TopicSessionExists(Guid id)
-        {
-            return _context.TopicSessions.Any(e => e.Id == id);
         }
     }
 }
