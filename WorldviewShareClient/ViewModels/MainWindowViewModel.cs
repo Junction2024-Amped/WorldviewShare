@@ -6,7 +6,8 @@ using System.Text.Json;
 using System.Windows.Input;
 using CommunityToolkit.Mvvm.Input;
 using WorldviewShareClient.Models;
-using WorldviewShareClient.Models.Users;
+using WorldviewShareShared.DTO.Users.Create;
+using WorldviewShareShared.DTO.Users.Get;
 
 namespace WorldviewShareClient.ViewModels;
 
