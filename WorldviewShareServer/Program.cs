@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using WorldviewShareServer.Data;
+using WorldviewShareServer.Hubs;
 using WorldviewShareServer.Services;
 namespace WorldviewShareServer;
 
@@ -45,6 +46,8 @@ public static class Program
         app.UseAuthorization();
         
         app.MapControllers();
+        
+        app.MapHub<ChatHub>("messages");
         
         app.Run();
     }
