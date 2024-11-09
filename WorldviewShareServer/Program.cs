@@ -18,6 +18,7 @@ public static class Program
         builder.Services.AddSwaggerGen(options =>
         {
             options.SupportNonNullableReferenceTypes();
+            options.AddSignalRSwaggerGen();
         });
         
         builder.Services.AddDbContext<WorldviewShareContext>(options =>

@@ -1,9 +1,11 @@
 using Microsoft.AspNetCore.SignalR;
+using SignalRSwaggerGen.Attributes;
 using WorldviewShareServer.Models;
 using WorldviewShareServer.Services;
 using WorldviewShareShared.DTO.Request.Messages;
 namespace WorldviewShareServer.Hubs;
 
+[SignalRHub("messages")]
 public class ChatHub : Hub
 {
     private readonly MessagesService _service;
