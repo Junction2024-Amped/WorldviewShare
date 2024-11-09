@@ -57,7 +57,8 @@
                                                Text="{Binding Message}"
                                                TextWrapping="Wrap" />
                                     <HyperlinkButton Content="Source"
-                                                     IsVisible="{Binding ShowSource}" />
+                                                     IsVisible="{Binding ShowSource}"
+                                                     Command="{Binding HandleLinkCommand}" />
                                 </StackPanel>
                             </Border>
                         </DataTemplate>
