@@ -293,7 +293,7 @@ public class MainWindowViewModel : ViewModelBase
     private async void SendMessage()
     {
         await connection.SendAsync("SendMessage",
-            new MessageRequestDto(MessageField, _currentTopicId, EnvironmentHelper.GetEnvironment().Id));
+            new MessageRequestDto(MessageField, null, _currentTopicId, EnvironmentHelper.GetEnvironment().Id));
 
         MessageField = string.Empty;
         CanChangeTopic = true;

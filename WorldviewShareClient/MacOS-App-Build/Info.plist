@@ -1,0 +1,40 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+  <dict>
+    <key>CFBundleName</key>
+    <string>KeyModManager</string>
+    <key>CFBundleDisplayName</key>
+    <string>KeyModManager</string>
+    <key>CFBundleIdentifier</key>
+    <string>com.keymasterer.keymodmanager</string>
+    <key>CFBundleVersion</key>
+    <string>1.0.0</string>
+    <key>CFBundlePackageType</key>
+    <string>APPL</string>
+    <key>CFBundleSignature</key>
+    <string>????</string>
+    <key>CFBundleExecutable</key>
+    <string>KeyModManager</string>
+    <key>CFBundleIconFile</key>
+    <string>KeyModManager.icns</string>
+    <key>CFBundleShortVersionString</key>
+    <string>1.0.0</string>
+    <key>NSPrincipalClass</key>
+    <string>NSApplication</string>
+    <key>NSHighResolutionCapable</key>
+    <true />
+    <key>CFBundleURLTypes</key>
+    <array>
+        <dict>
+            <key>CFBundleURLName</key>
+            <string>com.keymasterer.keymodmanager</string>
+            <key>CFBundleURLSchemes</key>
+            <array>
+                <string>keymodmanager</string>
+                <string>keymodmanager://</string>
+            </array>
+        </dict>
+    </array>
+  </dict>
+</plist>
