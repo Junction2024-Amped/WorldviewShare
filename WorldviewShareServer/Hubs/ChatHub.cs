@@ -54,12 +54,12 @@ public class ChatHub : Hub<IChatClient>
             await Clients.Caller.RejectJoinSession("User already in session");
             return;
         }
-        topicSession.Users.Add(user);
-        _topicSessionsService.SetEntityState(topicSession, EntityState.Modified);
-        await _topicSessionsService.SaveChangesAsync();
         _chatHubCache.ActiveUsers[topicSession] = user;
         await Groups.AddToGroupAsync(Context.ConnectionId, topicSession.Id.ToString());
         await Clients.Caller.AcceptJoinSession();
+        topicSession.Users.Add(user);
+        _topicSessionsService.SetEntityState(topicSession, EntityState.Modified);
+        await _topicSessionsService.SaveChangesAsync();
     }
     
     public async Task LeaveSession()
