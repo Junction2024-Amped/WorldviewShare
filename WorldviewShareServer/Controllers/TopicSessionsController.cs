@@ -1,9 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using WorldviewShareServer.Models;
 using WorldviewShareServer.Services;
 using WorldviewShareShared.DTO.Request.TopicSessions;
 using WorldviewShareShared.DTO.Request.Users;
+using WorldviewShareShared.DTO.Response.Messages;
 using WorldviewShareShared.DTO.Response.TopicSessions;
 
 namespace WorldviewShareServer.Controllers
@@ -43,14 +43,14 @@ namespace WorldviewShareServer.Controllers
         }
         
         [HttpGet("{id}/messages")]
-        public async Task<ActionResult<IEnumerable<Message>>> GetTopicSessionMessages(Guid id)
+        public async Task<ActionResult<IEnumerable<MessageResponseDto>>> GetTopicSessionMessages(Guid id)
         {
             var topicSession = await _topicSessionsService.GetTopicSessionById(id);
             if (topicSession == null)
             {
                 return NotFound();
             }
-            return (await _messagesService.GetMessages()).Where(m => m.TopicSession == topicSession).ToList();
+            return (await _messagesService.GetMessages()).Where(m => m.TopicSession == topicSession).Select(_messagesService.ToMessageResponseDto).ToList();
         }
 
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
