@@ -26,7 +26,11 @@ public static class Program
             options.UseSqlite(@"Data Source=Data/WorldviewShareData.db");
         });
         
-        builder.Services.AddSignalR();
+        builder.Services.AddSignalR(options =>
+        {
+            options.HandshakeTimeout = TimeSpan.FromSeconds(120);
+            options.ClientTimeoutInterval = TimeSpan.FromSeconds(240);
+        });
 
         builder.Services.AddSingleton<ChatHubCache>();
         
