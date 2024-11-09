@@ -54,38 +54,6 @@ namespace WorldviewShareServer.Controllers
         }
 
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutTopicSession(Guid id, TopicSessionRequestDto topicSessionDto)
-        {
-            var topicSession = await _topicSessionsService.GetTopicSessionById(id);
-            if (topicSession == null)
-            {
-                return NotFound();
-            }
-            topicSession.Name = topicSessionDto.Name;
-            topicSession.Topic = topicSessionDto.Topic;
-            _topicSessionsService.SetEntityState(topicSession, EntityState.Modified);
-
-            try
-            {
-                await _topicSessionsService.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!_topicSessionsService.TopicSessionExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return NoContent();
-        }
-
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
         public async Task<ActionResult<TopicSessionResponseDto>> PostTopicSession(TopicSessionRequestDto topicSessionDto)
         {
