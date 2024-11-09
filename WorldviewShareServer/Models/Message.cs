@@ -8,4 +8,5 @@ public class Message
     public Guid AuthorId { get; set; }
     public TopicSession TopicSession { get; set; } = null!;
     public Guid TopicSessionId { get; set; }
+    public DateTime CreatedAt { get; set; }
 }
