@@ -115,14 +115,14 @@ public class MainWindowViewModel : ViewModelBase
 
         try
         {
-            var test = await HttpClientFactory.GetClient()
+            var user = await HttpClientFactory.GetClient()
                 .PostAsync("api/users",
                     new StringContent(JsonSerializer.Serialize(dto), Encoding.UTF8, "application/json"));
 
-            if (test.IsSuccessStatusCode)
+            if (user.IsSuccessStatusCode)
             {
                 var responseContent =
-                    JsonSerializer.Deserialize<UserResponseDto>(test.Content.ReadAsStringAsync().Result);
+                    JsonSerializer.Deserialize<UserResponseDto>(user.Content.ReadAsStringAsync().Result);
                 if (responseContent != null) _environmentSettings.Id = responseContent.Id;
                 EnvironmentHelper.SaveEnvironment(_environmentSettings);
                 UserName = _environmentSettings.Name;
