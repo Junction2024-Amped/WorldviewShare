@@ -6,4 +6,5 @@ public class ChatHubCache
 {
     public readonly Dictionary<Guid, User> ActiveUsers = new(); 
     public readonly Dictionary<string, User> Users = new();
+    public readonly Dictionary<Guid, List<Guid>> TopicsPerUser = new();
 }
