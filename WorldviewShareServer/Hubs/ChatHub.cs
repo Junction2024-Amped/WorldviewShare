@@ -106,6 +106,10 @@ public class ChatHub : Hub<IChatClient>
             _chatHubCache.ActiveUsers[message.TopicSession] = newActiveUser;
             await Clients.Group(message.TopicSessionId.ToString()).ChangeActiveUser(_usersService.ToUserResponseDto(newActiveUser));
         }
+        else
+        {
+            await Clients.Group(message.TopicSessionId.ToString()).ChangeActiveUser(_usersService.ToUserResponseDto(_chatHubCache.ActiveUsers[message.TopicSession]));
+        }
         await Clients.Group(message.TopicSessionId.ToString()).ReceiveMessage(_messagesService.ToMessageResponseDto(message));
     }
     
