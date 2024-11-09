@@ -28,6 +28,8 @@ public class MainWindowViewModel : ViewModelBase
 
     private readonly Random rnd = new();
     private bool _canChangeTopic;
+    private bool _canSendMessage = true;
+    private int _currentContributions;
     private string _currentTopic;
     private Guid _currentTopicId = Guid.Empty;
     private bool _isCreateUserEnabled;
@@ -185,6 +187,17 @@ public class MainWindowViewModel : ViewModelBase
         }
     }
 
+    public bool CanSendMessage
+    {
+        get => _canSendMessage;
+        set
+        {
+            if (value == _canSendMessage) return;
+            _canSendMessage = value;
+            OnPropertyChanged();
+        }
+    }
+
     public async Task ChangeTopic()
     {
         var client = HttpClientFactory.GetClient();
@@ -193,6 +206,8 @@ public class MainWindowViewModel : ViewModelBase
         {
             Messages.Clear();
             CanChangeTopic = false;
+            _currentContributions = 0;
+            CanSendMessage = true;
             await connection.SendAsync("LeaveSession");
         }
 
@@ -282,5 +297,7 @@ public class MainWindowViewModel : ViewModelBase
 
         MessageField = string.Empty;
         CanChangeTopic = true;
+        _currentContributions++;
+        if (_currentContributions == 5) CanSendMessage = false;
     }
 }
