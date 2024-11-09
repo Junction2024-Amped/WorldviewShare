@@ -1,6 +1,7 @@
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using WorldviewShareServer.Data;
+using WorldviewShareServer.Services;
 namespace WorldviewShareServer;
 
 public class Program
@@ -25,6 +26,8 @@ public class Program
         {
             options.UseSqlite(connection);
         });
+        
+        builder.Services.AddScoped<MessagesService>();
         
         builder.Services.AddControllers();
 

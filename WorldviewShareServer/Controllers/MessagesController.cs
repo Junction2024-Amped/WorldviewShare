@@ -1,8 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using WorldviewShareServer.Data;
 using WorldviewShareServer.Dtos;
-using WorldviewShareServer.Models;
+using WorldviewShareServer.Services;
 
 namespace WorldviewShareServer.Controllers
 {
@@ -10,54 +9,38 @@ namespace WorldviewShareServer.Controllers
     [ApiController]
     public class MessagesController : ControllerBase
     {
-        private readonly WorldviewShareContext _context;
+        private readonly MessagesService _service;
 
-        public MessagesController(WorldviewShareContext context)
+        public MessagesController(MessagesService service)
         {
-            _context = context;
+            _service = service;
         }
         
-        private Message ToMessage(MessageRequestDto messageDto)
-        {
-            var message = new Message
-            {
-                Content = messageDto.Content,
-                TopicSessionId = messageDto.TopicSessionId,
-                AuthorId = messageDto.AuthorId,
-                CreatedAt = DateTime.Now
-            };
-            _context.Messages.Add(message);
-            return message;
-        }
-        
-        private async Task<Message?> GetMessageById(Guid id) => await _context.Messages.FindAsync(id);
-        
-        private static MessageResponseDto ToMessageResponseDto(Message message) => new(message.Id, message.Content, message.TopicSessionId, message.AuthorId, message.CreatedAt);
 
         [HttpGet]
         public async Task<ActionResult<IEnumerable<MessageResponseDto>>> GetMessages()
         {
-            return await _context.Messages.Select(m => ToMessageResponseDto(m)).ToListAsync();
+            return (await _service.GetMessages()).Select(_service.ToMessageResponseDto).ToList();
         }
 
         [HttpGet("{id}")]
         public async Task<ActionResult<MessageResponseDto>> GetMessage(Guid id)
         {
-            var message = await GetMessageById(id);
+            var message = await _service.GetMessageById(id);
 
             if (message == null)
             {
                 return NotFound();
             }
 
-            return ToMessageResponseDto(message);
+            return _service.ToMessageResponseDto(message);
         }
 
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
         public async Task<IActionResult> PutMessage(Guid id, MessageRequestDto messageDto)
         {
-            var message = await GetMessageById(id);
+            var message = await _service.GetMessageById(id);
             if (message == null)
             {
                 return NotFound();
@@ -66,15 +49,15 @@ namespace WorldviewShareServer.Controllers
             message.Content = messageDto.Content;
             message.TopicSessionId = messageDto.TopicSessionId;
             message.AuthorId = messageDto.AuthorId;
-            _context.Entry(message).State = EntityState.Modified;
+            _service.SetSEntityState(message, EntityState.Modified);
 
             try
             {
-                await _context.SaveChangesAsync();
+                await _service.SaveChangesAsync();
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!MessageExists(id))
+                if (!_service.MessageExists(id))
                 {
                     return NotFound();
                 }
@@ -91,30 +74,25 @@ namespace WorldviewShareServer.Controllers
         [HttpPost]
         public async Task<ActionResult<MessageResponseDto>> PostMessage(MessageRequestDto messageDto)
         {
-            var message = ToMessage(messageDto);
-            await _context.SaveChangesAsync();
+            var message = _service.ToMessage(messageDto);
+            await _service.SaveChangesAsync();
 
-            return CreatedAtAction("GetMessage", new { id = message.Id }, ToMessageResponseDto(message));
+            return CreatedAtAction("GetMessage", new { id = message.Id }, _service.ToMessageResponseDto(message));
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteMessage(Guid id)
         {
-            var message = await GetMessageById(id);
+            var message = await _service.GetMessageById(id);
             if (message == null)
             {
                 return NotFound();
             }
-
-            _context.Messages.Remove(message);
-            await _context.SaveChangesAsync();
+            
+            _service.RemoveMessage(message);
+            await _service.SaveChangesAsync();
 
             return NoContent();
-        }
-
-        private bool MessageExists(Guid id)
-        {
-            return _context.Messages.Any(e => e.Id == id);
         }
     }
 }
