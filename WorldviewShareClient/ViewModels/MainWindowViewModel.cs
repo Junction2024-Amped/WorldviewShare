@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Net.Http;
 using System.Text;
@@ -30,7 +31,7 @@ public class MainWindowViewModel : ViewModelBase
     private Guid _currentTopicId;
     private bool _isCreateUserEnabled;
     private string _messageField;
-    private List<MessageViewModel> _messages = new();
+    private ObservableCollection<MessageViewModel> _messages = new();
     private string _userInputUserName;
     private string _userName;
 
@@ -94,7 +95,7 @@ public class MainWindowViewModel : ViewModelBase
         });
     }
 
-    public List<MessageViewModel> Messages
+    public ObservableCollection<MessageViewModel> Messages
     {
         get => _messages;
         set

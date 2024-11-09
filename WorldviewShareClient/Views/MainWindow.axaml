@@ -42,7 +42,7 @@
                            Text="{Binding CurrentTopic}" />
             </Border>
             <ScrollViewer MaxHeight="800">
-                <ItemsControl ItemsSource="{Binding Messages}">
+                <ItemsControl ItemsSource="{Binding Messages, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}">
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
                             <Border CornerRadius="10"
