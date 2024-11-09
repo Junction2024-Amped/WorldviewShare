@@ -25,10 +25,12 @@
                 <Button IsEnabled="{Binding Path=isCreateUserEnabled}"
                         Content="{Binding Path=UserName}"
                         Command="{Binding CreateUserCommand}"
-                        Foreground="White" />
+                        Foreground="Black"
+                        Background="White" />
                 <TextBox IsVisible="{Binding isCreateUserEnabled}"
                          Text="{Binding UserInputUserName}"
-                         Foreground="White" />
+                         Foreground="Black"
+                         Background="White" />
             </StackPanel>
         </Grid>
         <StackPanel Grid.Row="1"
@@ -73,7 +75,8 @@
                      Width="200"
                      HorizontalAlignment="Left"
                      TextWrapping="Wrap"
-                     Foreground="White" />
+                     Foreground="Black"
+                     Background="White" />
             <Button IsDefault="True"
                     Content="Send message"
                     Command="{Binding SendMessageCommand}"
