@@ -27,4 +27,8 @@
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </Content>
     </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\WorldviewShareShared\WorldviewShareShared.csproj"/>
+    </ItemGroup>
 </Project>

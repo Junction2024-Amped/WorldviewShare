@@ -1,9 +1,8 @@
-using System;
 using System.Text.Json.Serialization;
 
-namespace WorldviewShareClient.Models.Users;
+namespace WorldviewShareShared.DTO.Users.Create;
 
-public class GetUserDto
+public class CreateUserDto
 {
     [JsonPropertyName("username")] public string Username { get; set; }
 
