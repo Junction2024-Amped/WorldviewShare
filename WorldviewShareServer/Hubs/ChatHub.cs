@@ -60,6 +60,7 @@ public class ChatHub : Hub<IChatClient>
         await Clients.All.ReceiveMessage(_messagesService.ToMessageResponseDto(message));
     }
     
+    [SignalRHidden]
     public async override Task OnDisconnectedAsync(Exception? exception)
     {
         if (_users.Remove(Context.ConnectionId, out var user))
