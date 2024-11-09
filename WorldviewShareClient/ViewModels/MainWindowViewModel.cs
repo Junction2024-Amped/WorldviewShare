@@ -63,6 +63,8 @@ public class MainWindowViewModel : ViewModelBase
 
         var client = HttpClientFactory.GetClient();
 
+        connection.On<string>("RejectJoinSession", Console.WriteLine);
+
         connection.On<MessageResponseDto>("ReceiveMessage", messageResponseDto =>
         {
             var authorName = string.Empty;
