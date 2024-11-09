@@ -64,6 +64,10 @@ public class MainWindowViewModel : ViewModelBase
         var client = HttpClientFactory.GetClient();
 
         connection.On<string>("RejectJoinSession", Console.WriteLine);
+        connection.On("AcceptJoinSession", () => Console.WriteLine("Accepted join session"));
+
+        connection.On<string>("RejectRegistration", Console.WriteLine);
+        connection.On("AcceptRegistration", () => Console.WriteLine("Accepted registration"));
 
         connection.On<MessageResponseDto>("ReceiveMessage", messageResponseDto =>
         {
