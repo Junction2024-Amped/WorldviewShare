@@ -92,6 +92,32 @@ namespace WorldviewShareServer.Controllers
 
             return CreatedAtAction("GetTopicSession", new { id = topicSession.Id }, ToTopicSessionResponseDto(topicSession));
         }
+        
+        [HttpPatch("{id}")]
+        public async Task<IActionResult> ToggleTopicParticipant(Guid id, UserReferenceRequestDto userDto)
+        {
+            var topicSession = await GetTopicSessionById(id);
+            if (topicSession == null)
+            {
+                return NotFound();
+            }
+            var user = await _context.Users.FindAsync(userDto.Id);
+            if (user == null)
+            {
+                return NotFound();
+            }
+            if (topicSession.Users.Contains(user))
+            {
+                topicSession.Users.Remove(user);
+            }
+            else
+            {
+                topicSession.Users.Add(user);
+            }
+            _context.Entry(topicSession).State = EntityState.Modified;
+            await _context.SaveChangesAsync();
+            return NoContent();
+        }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteTopicSession(Guid id)
