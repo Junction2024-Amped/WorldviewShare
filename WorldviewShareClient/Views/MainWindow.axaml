@@ -56,7 +56,8 @@
                                     <TextBlock Foreground="Black"
                                                Text="{Binding Message}"
                                                TextWrapping="Wrap" />
-                                    <HyperlinkButton Content="Source" />
+                                    <HyperlinkButton Content="Source"
+                                                     IsVisible="{Binding ShowSource}" />
                                 </StackPanel>
                             </Border>
                         </DataTemplate>
