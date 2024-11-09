@@ -80,20 +80,5 @@ namespace WorldviewShareServer.Controllers
 
             return CreatedAtAction("GetMessage", new { id = message.Id }, _service.ToMessageResponseDto(message));
         }
-
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteMessage(Guid id)
-        {
-            var message = await _service.GetMessageById(id);
-            if (message == null)
-            {
-                return NotFound();
-            }
-            
-            _service.RemoveMessage(message);
-            await _service.SaveChangesAsync();
-
-            return NoContent();
-        }
     }
 }

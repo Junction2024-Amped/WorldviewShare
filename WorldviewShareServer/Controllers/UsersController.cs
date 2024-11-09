@@ -76,20 +76,5 @@ namespace WorldviewShareServer.Controllers
 
             return CreatedAtAction("GetUser", new { id = user.Id }, _service.ToUserResponseDto(user));
         }
-
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteUser(Guid id)
-        {
-            var user = await _service.GetUserById(id);
-            if (user == null)
-            {
-                return NotFound();
-            }
-
-            _service.RemoveUser(user);
-            await _service.SaveChangesAsync();
-
-            return NoContent();
-        }
     }
 }
