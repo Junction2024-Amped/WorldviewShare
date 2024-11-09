@@ -19,6 +19,7 @@ public class MessagesService
         var message = new Message
         {
             Content = messageDto.Content,
+            Source = messageDto.Source,
             TopicSessionId = messageDto.TopicSessionId,
             AuthorId = messageDto.AuthorId,
             CreatedAt = DateTime.Now
@@ -31,7 +32,7 @@ public class MessagesService
         
     public async Task<Message?> GetMessageById(Guid id) => await _context.Messages.FindAsync(id);
         
-    public MessageResponseDto ToMessageResponseDto(Message message) => new(message.Id, message.Content, message.TopicSessionId, message.AuthorId, message.CreatedAt);
+    public MessageResponseDto ToMessageResponseDto(Message message) => new(message.Id, message.Content, message.Source, message.TopicSessionId, message.AuthorId, message.CreatedAt);
     
     public void RemoveMessage(Message message) => _context.Messages.Remove(message);
     
