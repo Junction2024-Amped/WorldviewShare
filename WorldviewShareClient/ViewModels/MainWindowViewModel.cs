@@ -97,8 +97,6 @@ public class MainWindowViewModel : ViewModelBase
     private async void CreateUser()
     {
         _environmentSettings.Name = UserInputUserName;
-        UserName = _environmentSettings.Name;
-        EnvironmentHelper.SaveEnvironment(_environmentSettings);
 
         var dto = new CreateUserDto
         {
@@ -106,10 +104,21 @@ public class MainWindowViewModel : ViewModelBase
             Id = _environmentSettings.Id
         };
 
-        var test = await HttpClientFactory.GetClient()
-            .PostAsync("api/users",
-                new StringContent(JsonSerializer.Serialize(dto), Encoding.UTF8, "application/json"));
+        try
+        {
+            var test = await HttpClientFactory.GetClient()
+                .PostAsync("api/users",
+                    new StringContent(JsonSerializer.Serialize(dto), Encoding.UTF8, "application/json"));
 
-        Console.WriteLine(test.Content.ReadAsStringAsync().Result);
+            if (test.IsSuccessStatusCode)
+            {
+                EnvironmentHelper.SaveEnvironment(_environmentSettings);
+                UserName = _environmentSettings.Name;
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+        }
     }
 }
