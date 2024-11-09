@@ -55,6 +55,8 @@ public class MainWindowViewModel : ViewModelBase
         connection.SendAsync("Register", new UserReferenceRequestDto(EnvironmentHelper.GetEnvironment().Id));
 
         Task.Factory.StartNew(async () => await ChangeTopic());
+
+        // connection.On("")
     }
 
     public List<MessageViewModel> Messages
@@ -147,7 +149,8 @@ public class MainWindowViewModel : ViewModelBase
             else
             {
                 var rawUserDate = await client.GetStringAsync($"api/users/{message.AuthorId}");
-                var user = JsonSerializer.Deserialize<UserResponseDto>(rawUserDate);
+                var user = JsonSerializer.Deserialize<UserResponseDto>(rawUserDate,
+                    new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
                 knownUsers.Add(user!);
                 authorName = user!.Username;
             }

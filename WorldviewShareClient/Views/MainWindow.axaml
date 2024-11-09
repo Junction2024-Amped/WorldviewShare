@@ -39,8 +39,8 @@
                             <Border CornerRadius="25"
                                     BorderThickness="2">
                                 <StackPanel Orientation="Vertical">
-                                    <TextBox Text="{Binding Name}" />
-                                    <TextBox Text="{Binding Message}" />
+                                    <TextBlock Text="{Binding Name}" />
+                                    <TextBlock Text="{Binding Message}" />
                                 </StackPanel>
                             </Border>
                         </DataTemplate>
