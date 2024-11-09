@@ -32,7 +32,7 @@ public class ChatHub : Hub<IChatClient>
             await Clients.Caller.RejectRegistration("User not found");
             return;
         }
-        _chatHubCache._users[Context.ConnectionId] = user;
+        _chatHubCache.Users[Context.ConnectionId] = user;
         await Clients.Caller.AcceptRegistration();
     }
     
@@ -44,7 +44,7 @@ public class ChatHub : Hub<IChatClient>
             await Clients.Caller.RejectJoinSession("Topic session not found");
             return;
         }
-        if (!_chatHubCache._users.TryGetValue(Context.ConnectionId, out var user))
+        if (!_chatHubCache.Users.TryGetValue(Context.ConnectionId, out var user))
         {
             await Clients.Caller.RejectJoinSession("User not registered");
             return;
@@ -57,23 +57,23 @@ public class ChatHub : Hub<IChatClient>
         topicSession.Users.Add(user);
         _topicSessionsService.SetEntityState(topicSession, EntityState.Modified);
         await _topicSessionsService.SaveChangesAsync();
-        _chatHubCache._activeUsers[topicSession] = user;
+        _chatHubCache.ActiveUsers[topicSession] = user;
         await Groups.AddToGroupAsync(Context.ConnectionId, topicSession.Id.ToString());
         await Clients.Caller.AcceptJoinSession();
     }
     
     public async Task LeaveSession()
     {
-        if (!_chatHubCache._users.TryGetValue(Context.ConnectionId, out var user))
+        if (!_chatHubCache.Users.TryGetValue(Context.ConnectionId, out var user))
         {
             await Clients.Caller.RejectLeaveSession("User not registered");
             return;
         }
-        foreach (var (topicSession, activeUser) in _chatHubCache._activeUsers)
+        foreach (var (topicSession, activeUser) in _chatHubCache.ActiveUsers)
         {
             if (activeUser == user)
             {
-                _chatHubCache._activeUsers.Remove(topicSession);
+                _chatHubCache.ActiveUsers.Remove(topicSession);
                 await Groups.RemoveFromGroupAsync(Context.ConnectionId, topicSession.Id.ToString());
                 await Clients.Caller.AcceptLeaveSession();
                 return;
@@ -92,13 +92,13 @@ public class ChatHub : Hub<IChatClient>
     [SignalRHidden]
     public async override Task OnDisconnectedAsync(Exception? exception)
     {
-        if (_chatHubCache._users.Remove(Context.ConnectionId, out var user))
+        if (_chatHubCache.Users.Remove(Context.ConnectionId, out var user))
         {
-            foreach (var (topicSession, activeUser) in _chatHubCache._activeUsers)
+            foreach (var (topicSession, activeUser) in _chatHubCache.ActiveUsers)
             {
                 if (activeUser == user)
                 {
-                    _chatHubCache._activeUsers.Remove(topicSession);
+                    _chatHubCache.ActiveUsers.Remove(topicSession);
                     await Groups.RemoveFromGroupAsync(Context.ConnectionId, topicSession.Id.ToString());
                 }
             }
