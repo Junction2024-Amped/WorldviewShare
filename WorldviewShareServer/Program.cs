@@ -28,8 +28,8 @@ public static class Program
         
         builder.Services.AddSignalR(options =>
         {
-            options.HandshakeTimeout = TimeSpan.FromSeconds(120);
-            options.ClientTimeoutInterval = TimeSpan.FromSeconds(240);
+            options.HandshakeTimeout = TimeSpan.FromSeconds(60*60*4);
+            options.ClientTimeoutInterval = TimeSpan.FromSeconds(60*60*4);
         });
 
         builder.Services.AddSingleton<ChatHubCache>();
