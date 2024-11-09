@@ -1,6 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using WorldviewShareServer.Data;
 using WorldviewShareServer.Models;
 using WorldviewShareServer.Services;
 using WorldviewShareShared.DTO.Request.TopicSessions;
@@ -15,11 +14,13 @@ namespace WorldviewShareServer.Controllers
     {
         private readonly TopicSessionsService _topicSessionsService;
         private readonly UsersService _usersService;
+        private readonly MessagesService _messagesService;
 
-        public TopicSessionsController(TopicSessionsService topicSessionsService, UsersService usersService)
+        public TopicSessionsController(TopicSessionsService topicSessionsService, UsersService usersService, MessagesService messagesService)
         {
             _topicSessionsService = topicSessionsService;
             _usersService = usersService;
+            _messagesService = messagesService;
         }
         
         [HttpGet]
@@ -39,6 +40,17 @@ namespace WorldviewShareServer.Controllers
             }
 
             return _topicSessionsService.ToTopicSessionResponseDto(topicSession);
+        }
+        
+        [HttpGet("{id}/messages")]
+        public async Task<ActionResult<IEnumerable<Message>>> GetTopicSessionMessages(Guid id)
+        {
+            var topicSession = await _topicSessionsService.GetTopicSessionById(id);
+            if (topicSession == null)
+            {
+                return NotFound();
+            }
+            return (await _messagesService.GetMessages()).Where(m => m.TopicSession == topicSession).ToList();
         }
 
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
