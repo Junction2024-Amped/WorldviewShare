@@ -24,9 +24,11 @@
                         Orientation="Vertical">
                 <Button IsEnabled="{Binding Path=isCreateUserEnabled}"
                         Content="{Binding Path=UserName}"
-                        Command="{Binding CreateUserCommand}" />
+                        Command="{Binding CreateUserCommand}"
+                        Foreground="White" />
                 <TextBox IsVisible="{Binding isCreateUserEnabled}"
-                         Text="{Binding UserInputUserName}" />
+                         Text="{Binding UserInputUserName}"
+                         Foreground="White" />
             </StackPanel>
         </Grid>
         <StackPanel Grid.Row="1"
@@ -70,11 +72,13 @@
             <TextBox Text="{Binding MessageField}"
                      Width="200"
                      HorizontalAlignment="Left"
-                     TextWrapping="Wrap" />
+                     TextWrapping="Wrap"
+                     Foreground="White" />
             <Button IsDefault="True"
                     Content="Send message"
                     Command="{Binding SendMessageCommand}"
-                    HorizontalAlignment="Right" />
+                    HorizontalAlignment="Right"
+                    Foreground="White" />
         </StackPanel>
     </Grid>
 </Window>
