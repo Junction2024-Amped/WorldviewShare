@@ -7,8 +7,8 @@ using System.Windows.Input;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.AspNetCore.SignalR.Client;
 using WorldviewShareClient.Models;
-using WorldviewShareShared.DTO.Users.Create;
-using WorldviewShareShared.DTO.Users.Get;
+using WorldviewShareShared.DTO.Request.Users;
+using WorldviewShareShared.DTO.Response.Users;
 
 namespace WorldviewShareClient.ViewModels;
 
@@ -111,11 +111,7 @@ public class MainWindowViewModel : ViewModelBase
     {
         _environmentSettings.Name = UserInputUserName;
 
-        var dto = new CreateUserDto
-        {
-            Username = _environmentSettings.Name,
-            Id = _environmentSettings.Id
-        };
+        var dto = new UserRequestDto(_environmentSettings.Name);
 
         try
         {
@@ -125,7 +121,8 @@ public class MainWindowViewModel : ViewModelBase
 
             if (test.IsSuccessStatusCode)
             {
-                var responseContent = JsonSerializer.Deserialize<GetUserDto>(test.Content.ReadAsStringAsync().Result);
+                var responseContent =
+                    JsonSerializer.Deserialize<UserResponseDto>(test.Content.ReadAsStringAsync().Result);
                 if (responseContent != null) _environmentSettings.Id = responseContent.Id;
                 EnvironmentHelper.SaveEnvironment(_environmentSettings);
                 UserName = _environmentSettings.Name;
