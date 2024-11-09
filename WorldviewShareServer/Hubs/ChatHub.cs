@@ -56,9 +56,9 @@ public class ChatHub : Hub<IChatClient>
             return;
         }
 
-        _chatHubCache.ActiveUsers.TryAdd(topicSession, user);
+        _chatHubCache.ActiveUsers.TryAdd(topicSession.Id, user);
         await Groups.AddToGroupAsync(Context.ConnectionId, topicSession.Id.ToString());
-        await Clients.Caller.AcceptJoinSession(_usersService.ToUserResponseDto(_chatHubCache.ActiveUsers[topicSession]));
+        await Clients.Caller.AcceptJoinSession(_usersService.ToUserResponseDto(_chatHubCache.ActiveUsers[topicSession.Id]));
         topicSession.Users.Add(user);
         _topicSessionsService.SetEntityState(topicSession, EntityState.Modified);
         await _topicSessionsService.SaveChangesAsync();
@@ -71,12 +71,12 @@ public class ChatHub : Hub<IChatClient>
             await Clients.Caller.RejectLeaveSession("User not registered");
             return;
         }
-        foreach (var (topicSession, activeUser) in _chatHubCache.ActiveUsers)
+        foreach (var (topicSessionId, activeUser) in _chatHubCache.ActiveUsers)
         {
             if (activeUser == user)
             {
-                _chatHubCache.ActiveUsers.Remove(topicSession);
-                await Groups.RemoveFromGroupAsync(Context.ConnectionId, topicSession.Id.ToString());
+                _chatHubCache.ActiveUsers.Remove(topicSessionId);
+                await Groups.RemoveFromGroupAsync(Context.ConnectionId, topicSessionId.ToString());
                 await Clients.Caller.AcceptLeaveSession();
                 return;
             }
@@ -87,14 +87,16 @@ public class ChatHub : Hub<IChatClient>
     public async Task SendMessage(MessageRequestDto messageDto)
     {
         var message = _messagesService.ToMessage(messageDto);
+        message.TopicSession = (await _topicSessionsService.GetTopicSessionById(messageDto.TopicSessionId))!;
+        message.Author = (await _usersService.GetUserById(messageDto.AuthorId))!;
         await _messagesService.SaveChangesAsync();
         if (!_chatHubCache.Users.TryGetValue(Context.ConnectionId, out _))
         {
             _chatHubCache.Users[Context.ConnectionId] = message.Author;
         }
-        if (_chatHubCache.ActiveUsers.TryGetValue(message.TopicSession, out var activeUser))
+        if (_chatHubCache.ActiveUsers.TryGetValue(message.TopicSession.Id, out var activeUser))
         {
-            if (activeUser != message.Author)
+            if (activeUser.Id != message.Author.Id)
             {
                 await Clients.Caller.RejectMessage("User is not active user in session");
                 return;
@@ -103,12 +105,12 @@ public class ChatHub : Hub<IChatClient>
         var newActiveUser = message.TopicSession.Users.Order(new RandomComparer<User>()).FirstOrDefault(u => u != message.Author);
         if (newActiveUser != null)
         {
-            _chatHubCache.ActiveUsers[message.TopicSession] = newActiveUser;
+            _chatHubCache.ActiveUsers[message.TopicSession.Id] = newActiveUser;
             await Clients.Group(message.TopicSessionId.ToString()).ChangeActiveUser(_usersService.ToUserResponseDto(newActiveUser));
         }
         else
         {
-            await Clients.Group(message.TopicSessionId.ToString()).ChangeActiveUser(_usersService.ToUserResponseDto(_chatHubCache.ActiveUsers[message.TopicSession]));
+            await Clients.Group(message.TopicSessionId.ToString()).ChangeActiveUser(_usersService.ToUserResponseDto(_chatHubCache.ActiveUsers[message.TopicSession.Id]));
         }
         await Clients.Group(message.TopicSessionId.ToString()).ReceiveMessage(_messagesService.ToMessageResponseDto(message));
     }
@@ -118,12 +120,12 @@ public class ChatHub : Hub<IChatClient>
     {
         if (_chatHubCache.Users.Remove(Context.ConnectionId, out var user))
         {
-            foreach (var (topicSession, activeUser) in _chatHubCache.ActiveUsers)
+            foreach (var (topicSessionId, activeUser) in _chatHubCache.ActiveUsers)
             {
                 if (activeUser == user)
                 {
-                    _chatHubCache.ActiveUsers.Remove(topicSession);
-                    await Groups.RemoveFromGroupAsync(Context.ConnectionId, topicSession.Id.ToString());
+                    _chatHubCache.ActiveUsers.Remove(topicSessionId);
+                    await Groups.RemoveFromGroupAsync(Context.ConnectionId, topicSessionId.ToString());
                 }
             }
             user.TopicSessions.Clear();
