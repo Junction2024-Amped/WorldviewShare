@@ -5,7 +5,8 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
         d:DesignWidth="800"
-        d:DesignHeight="450"
+        d:DesignHeight="900"
+        Background="Black"
         x:Class="WorldviewShareClient.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
         Icon="/Assets/avalonia-logo.ico"
@@ -32,16 +33,16 @@
                     Orientation="Vertical">
             <Border CornerRadius="10"
                     BorderThickness="2"
-                    BorderBrush="Azure"
-                    Background="Azure"
-                    Width="500"
+                    BorderBrush="LightGray"
+                    Background="LightGray"
+                    Width="600"
                     Margin="10">
                 <TextBlock x:Name="CurrentTopic"
-                           Margin="5"
+                           Margin="10"
                            Foreground="Black"
                            Text="{Binding CurrentTopic}" />
             </Border>
-            <ScrollViewer MaxHeight="900">
+            <ScrollViewer MaxHeight="850">
                 <ItemsControl ItemsSource="{Binding Messages, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}">
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
@@ -52,7 +53,7 @@
                                     Width="500"
                                     Margin="10">
                                 <StackPanel Orientation="Vertical"
-                                            Margin="5">
+                                            Margin="8">
                                     <TextBlock Foreground="Black"
                                                Text="{Binding Message}"
                                                TextWrapping="Wrap" />
@@ -68,22 +69,40 @@
         </StackPanel>
         <StackPanel Grid.Row="2"
                     Orientation="Horizontal">
-            <TextBox Text="{Binding MessageField}"
-                     Width="400"
-                     HorizontalAlignment="Left"
-                     TextWrapping="Wrap"
-                     MaxLength="256" />
-            <TextBox Text="{Binding SourceUri}"
-                     TextWrapping="Wrap" />
+            <StackPanel Orientation="Vertical"
+                        Margin="4">
+                <Label Content="Message:" />
+                <TextBox Text="{Binding MessageField}"
+                         Width="300"
+                         HorizontalAlignment="Left"
+                         TextWrapping="Wrap"
+                         MaxLength="256" />
+            </StackPanel>
+            <StackPanel Orientation="Vertical"
+                        Margin="4">
+                <Label Content="Source:" />
+                <TextBox Text="{Binding SourceUri}"
+                         TextWrapping="Wrap"
+                         Width="300" />
+            </StackPanel>
             <Button IsDefault="True"
                     IsEnabled="{Binding CanSendMessage}"
-                    Content="Send message"
+                    Content="Send"
                     Command="{Binding SendMessageCommand}"
-                    HorizontalAlignment="Right" />
-            <Button Content="Next topic"
-                    IsEnabled="{Binding CanChangeTopic}"
-                    Command="{Binding ChangeTopicCommand}"
-                    HorizontalAlignment="Right" />
+                    VerticalAlignment="Bottom"
+                    Margin="4" />
+            <StackPanel Orientation="Vertical">
+                <TextBlock>
+                    <Run Text="{Binding CurrentContributions}" />
+                    <Run Text="/ 5 contributions used" />
+                </TextBlock>
+                <Button Content="Next topic"
+                        IsEnabled="{Binding CanChangeTopic}"
+                        Command="{Binding ChangeTopicCommand}"
+                        HorizontalAlignment="Right"
+                        VerticalAlignment="Bottom"
+                        Margin="4" />
+            </StackPanel>
         </StackPanel>
     </Grid>
 </Window>

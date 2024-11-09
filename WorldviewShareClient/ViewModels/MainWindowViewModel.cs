@@ -28,7 +28,7 @@ public class MainWindowViewModel : ViewModelBase
 
     private readonly Random rnd = new();
     private bool _canChangeTopic;
-    private bool _canSendMessage = true;
+    private bool _canSendMessage;
     private int _currentContributions;
     private string _currentTopic;
     private Guid _currentTopicId = Guid.Empty;
@@ -116,6 +116,17 @@ public class MainWindowViewModel : ViewModelBase
         Task.Delay(200).Wait();
     }
 
+    public int CurrentContributions
+    {
+        get => _currentContributions;
+        set
+        {
+            if (Equals(value, _currentContributions)) return;
+            _currentContributions = value;
+            OnPropertyChanged();
+        }
+    }
+
     public Guid CurrentActiveUser
     {
         get => _currentUserId;
@@ -124,6 +135,8 @@ public class MainWindowViewModel : ViewModelBase
             _currentUserId = value;
             if (value == EnvironmentHelper.GetEnvironment().Id && _currentContributions < 5)
                 CanSendMessage = true;
+            else
+                CanSendMessage = false;
         }
     }
 
@@ -239,8 +252,7 @@ public class MainWindowViewModel : ViewModelBase
         {
             Messages.Clear();
             CanChangeTopic = false;
-            _currentContributions = 0;
-            CanSendMessage = true;
+            CurrentContributions = 0;
             await connection.SendAsync("LeaveSession");
         }
 
@@ -327,6 +339,8 @@ public class MainWindowViewModel : ViewModelBase
 
     private async void SendMessage()
     {
+        if (MessageField == string.Empty) return;
+
         if (SourceUri != null && SourceUri != string.Empty)
             await connection.SendAsync("SendMessage",
                 new MessageRequestDto(MessageField, new Uri(SourceUri), _currentTopicId,
@@ -336,8 +350,9 @@ public class MainWindowViewModel : ViewModelBase
                 new MessageRequestDto(MessageField, null, _currentTopicId, EnvironmentHelper.GetEnvironment().Id));
 
         MessageField = string.Empty;
+        SourceUri = string.Empty;
         CanChangeTopic = true;
-        _currentContributions++;
+        CurrentContributions++;
         CanSendMessage = false;
     }
 }
