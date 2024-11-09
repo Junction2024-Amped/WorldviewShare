@@ -3,11 +3,14 @@ using System.Collections.Generic;
 using System.Net.Http;
 using System.Text;
 using System.Text.Json;
+using System.Threading.Tasks;
 using System.Windows.Input;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.AspNetCore.SignalR.Client;
 using WorldviewShareClient.Models;
+using WorldviewShareShared.DTO.Request.TopicSessions;
 using WorldviewShareShared.DTO.Request.Users;
+using WorldviewShareShared.DTO.Response.TopicSessions;
 using WorldviewShareShared.DTO.Response.Users;
 
 namespace WorldviewShareClient.ViewModels;
@@ -17,6 +20,8 @@ public class MainWindowViewModel : ViewModelBase
     private readonly EnvironmentSettings _environmentSettings;
 
     private readonly HubConnection connection;
+
+    private readonly Random rnd = new();
     private string _currentTopic;
     private bool _isCreateUserEnabled;
     private List<MessageViewModel> _messages = new();
@@ -45,8 +50,9 @@ public class MainWindowViewModel : ViewModelBase
             .Build();
 
         connection.StartAsync().Wait();
+        connection.SendAsync("Register", new UserReferenceRequestDto(EnvironmentHelper.GetEnvironment().Id));
 
-        // connection.On("")
+        Task.Factory.StartNew(async () => await ChangeTopic());
     }
 
     public List<MessageViewModel> Messages
@@ -105,6 +111,25 @@ public class MainWindowViewModel : ViewModelBase
             _userInputUserName = value;
             OnPropertyChanged();
         }
+    }
+
+    public async Task ChangeTopic()
+    {
+        // TODO: Leave session if one exists
+        var client = HttpClientFactory.GetClient();
+
+        var rawTopicData = await client.GetStringAsync("api/topics");
+        var topics = JsonSerializer.Deserialize<List<TopicSessionResponseDto>>(rawTopicData,
+            new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+        if (topics!.Count == 0) return;
+
+        var i = rnd.Next(topics!.Count);
+
+        CurrentTopic = topics[i].Topic;
+
+        // Join session
+        await connection.SendAsync("JoinSession", new TopicSessionReferenceRequestDto(topics[i].Id));
     }
 
     private async void CreateUser()
