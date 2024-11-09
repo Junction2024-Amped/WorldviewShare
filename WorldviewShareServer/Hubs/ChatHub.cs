@@ -3,10 +3,11 @@ using SignalRSwaggerGen.Attributes;
 using WorldviewShareServer.Models;
 using WorldviewShareServer.Services;
 using WorldviewShareShared.DTO.Request.Messages;
+using WorldviewShareShared.WebsocketClientInterfaces;
 namespace WorldviewShareServer.Hubs;
 
 [SignalRHub("messages")]
-public class ChatHub : Hub
+public class ChatHub : Hub<IChatClient>
 {
     private readonly MessagesService _service;
     private readonly Dictionary<TopicSession, User> _activeUsers = new();
@@ -19,6 +20,6 @@ public class ChatHub : Hub
     {
         var message = _service.ToMessage(messageDto);
         await _service.SaveChangesAsync();
-        await Clients.All.SendAsync("ReceiveMessage", _service.ToMessageResponseDto(message));
+        await Clients.All.ReceiveMessage(_service.ToMessageResponseDto(message));
     }
 }
