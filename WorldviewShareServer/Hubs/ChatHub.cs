@@ -26,7 +26,13 @@ public class ChatHub : Hub<IChatClient>
     public async Task Register(UserReferenceRequestDto userDto)
     {
         var user = await _usersService.GetUserById(userDto.Id);
-        _users[Context.ConnectionId] = user ?? throw new ArgumentException("User not found"); // TODO: make this handling less horrible
+        if (user == null)
+        {
+            await Clients.Caller.RejectRegistration("User not found");
+            return;
+        }
+        _users[Context.ConnectionId] = user;
+        await Clients.Caller.AcceptRegistration();
     }
     
     public async Task JoinSession(TopicSessionReferenceRequestDto request)
@@ -34,14 +40,17 @@ public class ChatHub : Hub<IChatClient>
         var topicSession = await _topicSessionsService.GetTopicSessionById(request.Id);
         if (topicSession == null)
         {
-            throw new ArgumentException("Topic session not found"); // TODO: make this handling less horrible
+            await Clients.Caller.RejectJoinSession("Topic session not found");
+            return;
         }
         if (!_users.TryGetValue(Context.ConnectionId, out var user))
         {
-            throw new ArgumentException("User not found"); // TODO: make this handling less horrible
+            await Clients.Caller.RejectJoinSession("User not registered");
+            return;
         }
         _activeUsers[topicSession] = user;
         await Groups.AddToGroupAsync(Context.ConnectionId, topicSession.Id.ToString());
+        await Clients.Caller.AcceptJoinSession();
     }
 
     public async Task SendMessage(MessageRequestDto messageDto)
