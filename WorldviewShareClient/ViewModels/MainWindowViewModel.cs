@@ -5,6 +5,7 @@ using System.Text;
 using System.Text.Json;
 using System.Windows.Input;
 using CommunityToolkit.Mvvm.Input;
+using Microsoft.AspNetCore.SignalR.Client;
 using WorldviewShareClient.Models;
 using WorldviewShareShared.DTO.Users.Create;
 using WorldviewShareShared.DTO.Users.Get;
@@ -14,6 +15,8 @@ namespace WorldviewShareClient.ViewModels;
 public class MainWindowViewModel : ViewModelBase
 {
     private readonly EnvironmentSettings _environmentSettings;
+
+    private readonly HubConnection connection;
     private string _currentTopic;
     private bool _isCreateUserEnabled;
     private List<MessageViewModel> _messages = new();
@@ -35,6 +38,15 @@ public class MainWindowViewModel : ViewModelBase
         {
             UserName = _environmentSettings.Name;
         }
+
+        connection = new HubConnectionBuilder()
+            .WithUrl("http://localhost:5140/messages")
+            .WithAutomaticReconnect()
+            .Build();
+
+        connection.StartAsync().Wait();
+
+        // connection.On("")
     }
 
     public List<MessageViewModel> Messages

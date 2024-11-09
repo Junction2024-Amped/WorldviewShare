@@ -4,8 +4,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WorldviewShareServer", "Wor
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WorldviewShareShared", "..\WorldviewShareShared\WorldviewShareShared.csproj", "{6C8D92A6-D40F-4446-A1FC-1B9CD3DAA103}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WorldviewShareShared", "..\WorldviewShareShared\WorldviewShareShared.csproj", "{77326FD4-E4E2-48F8-9B6B-BA1FC5623BE6}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
