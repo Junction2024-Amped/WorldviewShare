@@ -35,6 +35,7 @@ public class MainWindowViewModel : ViewModelBase
     private bool _isCreateUserEnabled;
     private string _messageField;
     private ObservableCollection<MessageViewModel> _messages = new();
+    private string _source;
     private string _userInputUserName;
     private string _userName;
 
@@ -98,7 +99,9 @@ public class MainWindowViewModel : ViewModelBase
             Messages.Add(new MessageViewModel
             {
                 Message = messageResponseDto.Content,
-                Name = authorName
+                Name = authorName,
+                Source = messageResponseDto.Source,
+                ShowSource = messageResponseDto.Source != null
             });
         });
 
@@ -198,6 +201,17 @@ public class MainWindowViewModel : ViewModelBase
         }
     }
 
+    public string SourceUri
+    {
+        get => _source;
+        set
+        {
+            if (value == _source) return;
+            _source = value;
+            OnPropertyChanged();
+        }
+    }
+
     public async Task ChangeTopic()
     {
         var client = HttpClientFactory.GetClient();
@@ -255,7 +269,9 @@ public class MainWindowViewModel : ViewModelBase
             Messages.Add(new MessageViewModel
             {
                 Message = message.Content,
-                Name = authorName
+                Name = authorName,
+                Source = message.Source,
+                ShowSource = message.Source != null
             });
         }
 
@@ -292,8 +308,13 @@ public class MainWindowViewModel : ViewModelBase
 
     private async void SendMessage()
     {
-        await connection.SendAsync("SendMessage",
-            new MessageRequestDto(MessageField, null, _currentTopicId, EnvironmentHelper.GetEnvironment().Id));
+        if (SourceUri != string.Empty)
+            await connection.SendAsync("SendMessage",
+                new MessageRequestDto(MessageField, new Uri(SourceUri), _currentTopicId,
+                    EnvironmentHelper.GetEnvironment().Id));
+        else
+            await connection.SendAsync("SendMessage",
+                new MessageRequestDto(MessageField, null, _currentTopicId, EnvironmentHelper.GetEnvironment().Id));
 
         MessageField = string.Empty;
         CanChangeTopic = true;
