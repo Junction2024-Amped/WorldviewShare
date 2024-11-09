@@ -4,7 +4,7 @@ using WorldviewShareServer.Data;
 using WorldviewShareServer.Services;
 namespace WorldviewShareServer;
 
-public class Program
+public static class Program
 {
     public static void Main(string[] args)
     {
