@@ -112,6 +112,8 @@ public class MainWindowViewModel : ViewModelBase
 
             if (test.IsSuccessStatusCode)
             {
+                var responseContent = JsonSerializer.Deserialize<GetUserDto>(test.Content.ReadAsStringAsync().Result);
+                if (responseContent != null) _environmentSettings.Id = responseContent.Id;
                 EnvironmentHelper.SaveEnvironment(_environmentSettings);
                 UserName = _environmentSettings.Name;
             }
