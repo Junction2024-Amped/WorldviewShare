@@ -1,9 +1,10 @@
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using WorldviewShareServer.Data;
+using WorldviewShareServer.Services;
 namespace WorldviewShareServer;
 
-public class Program
+public static class Program
 {
     public static void Main(string[] args)
     {
@@ -23,6 +24,8 @@ public class Program
         {
             options.UseSqlite(@"Data Source=Data/WorldviewShareData.db");
         });
+        
+        builder.Services.AddScoped<MessagesService>();
         
         builder.Services.AddControllers();
 
