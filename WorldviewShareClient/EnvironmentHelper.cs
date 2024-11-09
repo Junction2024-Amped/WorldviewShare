@@ -32,7 +32,8 @@ public static class EnvironmentHelper
             {
                 using var reader = new StreamReader("environment.env");
                 var json = reader.ReadToEnd();
-                _settings = JsonSerializer.Deserialize<EnvironmentSettings>(json);
+                _settings = JsonSerializer.Deserialize<EnvironmentSettings>(json,
+                    new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
                 reader.Close();
 
                 var result = Task.Run(() => CheckIfUserExists(_settings.Id.ToString())).Result;
