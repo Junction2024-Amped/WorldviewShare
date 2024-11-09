@@ -24,6 +24,8 @@ public static class Program
             options.UseSqlite(@"Data Source=Data/WorldviewShareData.db");
         });
         
+        builder.Services.AddSignalR();
+        
         builder.Services.AddScoped<MessagesService>();
         
         builder.Services.AddControllers();
