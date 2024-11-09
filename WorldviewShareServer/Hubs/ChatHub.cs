@@ -50,4 +50,20 @@ public class ChatHub : Hub<IChatClient>
         await _messagesService.SaveChangesAsync();
         await Clients.All.ReceiveMessage(_messagesService.ToMessageResponseDto(message));
     }
+    
+    public async override Task OnDisconnectedAsync(Exception? exception)
+    {
+        if (_users.Remove(Context.ConnectionId, out var user))
+        {
+            foreach (var (topicSession, activeUser) in _activeUsers)
+            {
+                if (activeUser == user)
+                {
+                    _activeUsers.Remove(topicSession);
+                    await Groups.RemoveFromGroupAsync(Context.ConnectionId, topicSession.Id.ToString());
+                }
+            }
+        }
+        await base.OnDisconnectedAsync(exception);
+    }
 }
