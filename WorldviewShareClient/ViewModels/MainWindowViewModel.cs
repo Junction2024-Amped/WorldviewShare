@@ -27,8 +27,11 @@ public class MainWindowViewModel : ViewModelBase
     private readonly List<UserResponseDto> knownUsers = new();
 
     private readonly Random rnd = new();
+    private bool _canChangeTopic;
+    private bool _canSendMessage = true;
+    private int _currentContributions;
     private string _currentTopic;
-    private Guid _currentTopicId;
+    private Guid _currentTopicId = Guid.Empty;
     private bool _isCreateUserEnabled;
     private string _messageField;
     private ObservableCollection<MessageViewModel> _messages = new();
@@ -39,6 +42,7 @@ public class MainWindowViewModel : ViewModelBase
     {
         CreateUserCommand = new RelayCommand(CreateUser);
         SendMessageCommand = new RelayCommand(SendMessage);
+        ChangeTopicCommand = new RelayCommand(async () => await ChangeTopic());
 
         _environmentSettings = EnvironmentHelper.GetEnvironment();
 
@@ -57,6 +61,15 @@ public class MainWindowViewModel : ViewModelBase
             .WithAutomaticReconnect()
             .Build();
 
+        connection.On<string>("RejectJoinSession", Console.WriteLine);
+        connection.On("AcceptJoinSession", () => Console.WriteLine("Accepted join session"));
+
+        connection.On<string>("RejectLeaveSession", Console.WriteLine);
+        connection.On("AcceptLeaveSession", () => Console.WriteLine("Accepted leave session"));
+
+        connection.On<string>("RejectRegistration", Console.WriteLine);
+        connection.On("AcceptRegistration", () => Console.WriteLine("Accepted registration"));
+
         connection.StartAsync().Wait();
         connection.SendAsync("Register", new UserReferenceRequestDto(EnvironmentHelper.GetEnvironment().Id));
 
@@ -64,11 +77,6 @@ public class MainWindowViewModel : ViewModelBase
 
         var client = HttpClientFactory.GetClient();
 
-        connection.On<string>("RejectJoinSession", Console.WriteLine);
-        connection.On("AcceptJoinSession", () => Console.WriteLine("Accepted join session"));
-
-        connection.On<string>("RejectRegistration", Console.WriteLine);
-        connection.On("AcceptRegistration", () => Console.WriteLine("Accepted registration"));
 
         connection.On<MessageResponseDto>("ReceiveMessage", messageResponseDto =>
         {
@@ -93,6 +101,8 @@ public class MainWindowViewModel : ViewModelBase
                 Name = authorName
             });
         });
+
+        Task.Delay(100).Wait();
     }
 
     public ObservableCollection<MessageViewModel> Messages
@@ -131,6 +141,7 @@ public class MainWindowViewModel : ViewModelBase
 
     public ICommand CreateUserCommand { get; }
     public ICommand SendMessageCommand { get; }
+    public ICommand ChangeTopicCommand { get; }
 
     public bool isCreateUserEnabled
     {
@@ -165,10 +176,40 @@ public class MainWindowViewModel : ViewModelBase
         }
     }
 
+    public bool CanChangeTopic
+    {
+        get => _canChangeTopic;
+        set
+        {
+            if (value == _canChangeTopic) return;
+            _canChangeTopic = value;
+            OnPropertyChanged();
+        }
+    }
+
+    public bool CanSendMessage
+    {
+        get => _canSendMessage;
+        set
+        {
+            if (value == _canSendMessage) return;
+            _canSendMessage = value;
+            OnPropertyChanged();
+        }
+    }
+
     public async Task ChangeTopic()
     {
-        // TODO: Leave session if one exists
         var client = HttpClientFactory.GetClient();
+
+        if (_currentTopicId != Guid.Empty)
+        {
+            Messages.Clear();
+            CanChangeTopic = false;
+            _currentContributions = 0;
+            CanSendMessage = true;
+            await connection.SendAsync("LeaveSession");
+        }
 
         var rawTopicData = await client.GetStringAsync("api/topics");
         var topics = JsonSerializer.Deserialize<List<TopicSessionResponseDto>>(rawTopicData,
@@ -176,10 +217,19 @@ public class MainWindowViewModel : ViewModelBase
 
         if (topics!.Count == 0) return;
 
-        var i = rnd.Next(topics!.Count);
+        var i = 0;
 
-        CurrentTopic = topics[i].Topic;
-        _currentTopicId = topics[i].Id;
+        while (true)
+        {
+            i = rnd.Next(topics!.Count);
+
+            if (topics![i].Id != _currentTopicId || topics.Count == 1)
+            {
+                CurrentTopic = topics[i].Topic;
+                _currentTopicId = topics[i].Id;
+                break;
+            }
+        }
 
         var rawMessageData = await client.GetStringAsync($"api/topics/{topics[i].Id}/messages");
         var messages = JsonSerializer.Deserialize<List<MessageResponseDto>>(rawMessageData,
@@ -246,5 +296,8 @@ public class MainWindowViewModel : ViewModelBase
             new MessageRequestDto(MessageField, _currentTopicId, EnvironmentHelper.GetEnvironment().Id));
 
         MessageField = string.Empty;
+        CanChangeTopic = true;
+        _currentContributions++;
+        if (_currentContributions == 5) CanSendMessage = false;
     }
 }
