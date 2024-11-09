@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
 using System.Text;
 using System.Text.Json;
@@ -10,6 +11,7 @@ using Microsoft.AspNetCore.SignalR.Client;
 using WorldviewShareClient.Models;
 using WorldviewShareShared.DTO.Request.TopicSessions;
 using WorldviewShareShared.DTO.Request.Users;
+using WorldviewShareShared.DTO.Response.Messages;
 using WorldviewShareShared.DTO.Response.TopicSessions;
 using WorldviewShareShared.DTO.Response.Users;
 
@@ -127,6 +129,35 @@ public class MainWindowViewModel : ViewModelBase
         var i = rnd.Next(topics!.Count);
 
         CurrentTopic = topics[i].Topic;
+
+        var rawMessageData = await client.GetStringAsync($"api/topics/{topics[i].Id}/messages");
+        var messages = JsonSerializer.Deserialize<List<MessageResponseDto>>(rawMessageData,
+            new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+        List<UserResponseDto> knownUsers = new();
+
+        foreach (var message in messages!)
+        {
+            var authorName = string.Empty;
+
+            if (knownUsers.Any(x => x.Id == message.AuthorId))
+            {
+                authorName = knownUsers.First(x => x.Id == message.AuthorId).Username;
+            }
+            else
+            {
+                var rawUserDate = await client.GetStringAsync($"api/users/{message.AuthorId}");
+                var user = JsonSerializer.Deserialize<UserResponseDto>(rawUserDate);
+                knownUsers.Add(user!);
+                authorName = user!.Username;
+            }
+
+            Messages.Add(new MessageViewModel
+            {
+                Message = message.Content,
+                Name = authorName
+            });
+        }
 
         // Join session
         await connection.SendAsync("JoinSession", new TopicSessionReferenceRequestDto(topics[i].Id));
