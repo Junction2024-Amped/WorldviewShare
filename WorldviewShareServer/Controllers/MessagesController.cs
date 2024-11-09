@@ -49,7 +49,7 @@ namespace WorldviewShareServer.Controllers
             message.Content = messageDto.Content;
             message.TopicSessionId = messageDto.TopicSessionId;
             message.AuthorId = messageDto.AuthorId;
-            _service.SetSEntityState(message, EntityState.Modified);
+            _service.SetEntityState(message, EntityState.Modified);
 
             try
             {

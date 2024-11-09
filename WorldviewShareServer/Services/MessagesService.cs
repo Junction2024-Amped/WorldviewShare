@@ -36,7 +36,7 @@ public class MessagesService
     
     public async Task SaveChangesAsync() => await _context.SaveChangesAsync();
     
-    public void SetSEntityState(Message message, EntityState state) => _context.Entry(message).State = state;
+    public void SetEntityState(Message message, EntityState state) => _context.Entry(message).State = state;
 
     public bool MessageExists(Guid id) => _context.Messages.Any(e => e.Id == id);
 }
