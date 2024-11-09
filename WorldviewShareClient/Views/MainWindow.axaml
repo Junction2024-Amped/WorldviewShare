@@ -17,20 +17,15 @@
         <vm:MainWindowViewModel />
     </Design.DataContext>
 
-    <Grid RowDefinitions="Auto, *, Auto"
-          Background="Black">
+    <Grid RowDefinitions="Auto, *, Auto">
         <Grid ColumnDefinitions="*, 100">
             <StackPanel Grid.Column="1"
                         Orientation="Vertical">
                 <Button IsEnabled="{Binding Path=isCreateUserEnabled}"
                         Content="{Binding Path=UserName}"
-                        Command="{Binding CreateUserCommand}"
-                        Foreground="Black"
-                        Background="White" />
+                        Command="{Binding CreateUserCommand}" />
                 <TextBox IsVisible="{Binding isCreateUserEnabled}"
-                         Text="{Binding UserInputUserName}"
-                         Foreground="Black"
-                         Background="White" />
+                         Text="{Binding UserInputUserName}" />
             </StackPanel>
         </Grid>
         <StackPanel Grid.Row="1"
@@ -59,9 +54,8 @@
                                 <StackPanel Orientation="Vertical"
                                             Margin="5">
                                     <TextBlock Foreground="Black"
-                                               Text="{Binding Name}" />
-                                    <TextBlock Foreground="Black"
-                                               Text="{Binding Message}" />
+                                               Text="{Binding Message}"
+                                               TextWrapping="Wrap" />
                                 </StackPanel>
                             </Border>
                         </DataTemplate>
@@ -75,13 +69,15 @@
                      Width="200"
                      HorizontalAlignment="Left"
                      TextWrapping="Wrap"
-                     Foreground="Black"
-                     Background="White" />
+                     MaxLength="256" />
             <Button IsDefault="True"
                     Content="Send message"
                     Command="{Binding SendMessageCommand}"
-                    HorizontalAlignment="Right"
-                    Foreground="White" />
+                    HorizontalAlignment="Right" />
+            <Button Content="Next topic"
+                    IsEnabled="{Binding CanChangeTopic}"
+                    Command="{Binding ChangeTopicCommand}"
+                    HorizontalAlignment="Right" />
         </StackPanel>
     </Grid>
 </Window>
