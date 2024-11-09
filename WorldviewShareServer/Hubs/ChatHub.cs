@@ -83,7 +83,23 @@ public class ChatHub : Hub<IChatClient>
             {
                 if (_chatHubCache.TopicsPerUser.TryGetValue(user.Id, out var topicSessionList))
                     topicSessionList.Remove(topicSessionId);
-                _chatHubCache.ActiveUsers.Remove(topicSessionId);
+                var newActiveUser = _chatHubCache.TopicsPerUser
+                    .Where(kv => kv.Value.Contains(topicSessionId))
+                    .Select(async kv => await _usersService.GetUserById(kv.Key))
+                    .Select(t => t.GetAwaiter().GetResult())
+                    .Cast<User>()
+                    .Order(new RandomComparer<User>())
+                    .FirstOrDefault(u => u.Id != user.Id);
+                if (newActiveUser != null)
+                {
+                    _chatHubCache.ActiveUsers[topicSessionId] = newActiveUser;
+                    await Clients.Group(topicSessionId.ToString())
+                        .ChangeActiveUser(_usersService.ToUserResponseDto(_chatHubCache.ActiveUsers[topicSessionId]));
+                }
+                else
+                {
+                    _chatHubCache.ActiveUsers.Remove(topicSessionId);
+                }
                 await Groups.RemoveFromGroupAsync(Context.ConnectionId, topicSessionId.ToString());
                 await Clients.Caller.AcceptLeaveSession();
                 return;
@@ -113,7 +129,7 @@ public class ChatHub : Hub<IChatClient>
             .Select(t => t.GetAwaiter().GetResult())
             .Cast<User>()
             .Order(new RandomComparer<User>())
-            .FirstOrDefault(u => u != message.Author);
+            .FirstOrDefault(u => u.Id != message.Author.Id);
         if (newActiveUser != null)
         {
             _chatHubCache.ActiveUsers[message.TopicSession.Id] = newActiveUser;
@@ -131,16 +147,32 @@ public class ChatHub : Hub<IChatClient>
     }
 
     [SignalRHidden]
-    public override async Task OnDisconnectedAsync(Exception? exception)
+    public async override Task OnDisconnectedAsync(Exception? exception)
     {
         if (_chatHubCache.Users.Remove(Context.ConnectionId, out var user))
         {
-            foreach (var (topicSessionId, activeUser) in _chatHubCache.ActiveUsers)
+            foreach (var (topicSessionId, activeUser) in _chatHubCache.ActiveUsers) {
                 if (activeUser == user)
                 {
-                    _chatHubCache.ActiveUsers.Remove(topicSessionId);
-                    await Groups.RemoveFromGroupAsync(Context.ConnectionId, topicSessionId.ToString());
+                    var newActiveUser = _chatHubCache.TopicsPerUser
+                        .Where(kv => kv.Value.Contains(topicSessionId))
+                        .Select(async kv => await _usersService.GetUserById(kv.Key))
+                        .Select(t => t.GetAwaiter().GetResult())
+                        .Cast<User>()
+                        .Order(new RandomComparer<User>())
+                        .FirstOrDefault(u => u.Id != user.Id);
+                    if (newActiveUser != null)
+                    {
+                        _chatHubCache.ActiveUsers[topicSessionId] = newActiveUser;
+                        await Clients.Group(topicSessionId.ToString())
+                            .ChangeActiveUser(_usersService.ToUserResponseDto(_chatHubCache.ActiveUsers[topicSessionId]));
+                    }
+                    else
+                    {
+                        _chatHubCache.ActiveUsers.Remove(topicSessionId);
+                    }                    await Groups.RemoveFromGroupAsync(Context.ConnectionId, topicSessionId.ToString());
                 }
+            }
 
             user.TopicSessions.Clear();
             _usersService.SetEntityState(user, EntityState.Modified);
