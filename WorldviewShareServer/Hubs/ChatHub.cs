@@ -49,6 +49,11 @@ public class ChatHub : Hub<IChatClient>
             await Clients.Caller.RejectJoinSession("User not registered");
             return;
         }
+        if (topicSession.Users.Contains(user))
+        {
+            await Clients.Caller.RejectJoinSession("User already in session");
+            return;
+        }
         topicSession.Users.Add(user);
         _topicSessionsService.SetEntityState(topicSession, EntityState.Modified);
         await _topicSessionsService.SaveChangesAsync();
@@ -97,6 +102,9 @@ public class ChatHub : Hub<IChatClient>
                     await Groups.RemoveFromGroupAsync(Context.ConnectionId, topicSession.Id.ToString());
                 }
             }
+            user.TopicSessions.Clear();
+            _usersService.SetEntityState(user, EntityState.Modified);
+            await _usersService.SaveChangesAsync();
         }
         await base.OnDisconnectedAsync(exception);
     }
