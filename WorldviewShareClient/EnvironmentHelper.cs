@@ -67,6 +67,7 @@ public static class EnvironmentHelper
 
             return true;
         }
+
         catch (Exception e)
         {
             return false;
