@@ -113,7 +113,7 @@ public class MainWindowViewModel : ViewModelBase
             });
         });
 
-        Task.Delay(100).Wait();
+        Task.Delay(200).Wait();
     }
 
     public Guid CurrentActiveUser
