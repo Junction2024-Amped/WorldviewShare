@@ -28,6 +28,25 @@
                          Text="{Binding UserInputUserName}" />
             </StackPanel>
         </Grid>
+        <StackPanel Grid.Row="1"
+                    Orientation="Vertical">
+            <TextBlock x:Name="CurrentTopic"
+                       Text="{Binding CurrentTopic}" />
+            <ScrollViewer>
+                <ItemsControl ItemsSource="{Binding Messages}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Border CornerRadius="25"
+                                    BorderThickness="2">
+                                <StackPanel Orientation="Vertical">
+                                    <TextBox Text="{Binding Name}" />
+                                    <TextBox Text="{Binding Message}" />
+                                </StackPanel>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+        </StackPanel>
     </Grid>
-
 </Window>

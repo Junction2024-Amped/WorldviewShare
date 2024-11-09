@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Net.Http;
 using System.Text;
 using System.Text.Json;
@@ -12,7 +13,9 @@ namespace WorldviewShareClient.ViewModels;
 public class MainWindowViewModel : ViewModelBase
 {
     private readonly EnvironmentSettings _environmentSettings;
+    private string _currentTopic;
     private bool _isCreateUserEnabled;
+    private List<MessageViewModel> _messages = new();
     private string _userInputUserName;
     private string _userName;
 
@@ -30,6 +33,28 @@ public class MainWindowViewModel : ViewModelBase
         else
         {
             UserName = _environmentSettings.Name;
+        }
+    }
+
+    public List<MessageViewModel> Messages
+    {
+        get => _messages;
+        set
+        {
+            if (Equals(value, _messages)) return;
+            _messages = value;
+            OnPropertyChanged();
+        }
+    }
+
+    public string CurrentTopic
+    {
+        get => _currentTopic;
+        set
+        {
+            if (value == _currentTopic) return;
+            _currentTopic = value;
+            OnPropertyChanged();
         }
     }
 
