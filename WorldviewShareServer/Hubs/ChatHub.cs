@@ -96,7 +96,7 @@ public class ChatHub : Hub<IChatClient>
                 {
                     if (_chatHubCache.ActiveUsers.TryGetValue(topicId, out var activeUser))
                     {
-                        if (activeUser == user)
+                        if (activeUser.Id == user.Id)
                         {
                             var newActiveUser = _chatHubCache.TopicsPerUser.Where(kv => kv.Value.Contains(topicId)).Select(async kv => await _usersService.GetUserById(kv.Key)).Select(t => t.GetAwaiter().GetResult()).Cast<User>().Order(new RandomComparer<User>()).FirstOrDefault(u => u.Id != user.Id);
                             if (newActiveUser != null)
@@ -171,7 +171,7 @@ public class ChatHub : Hub<IChatClient>
                     {
                         if (_chatHubCache.ActiveUsers.TryGetValue(topicId, out var activeUser))
                         {
-                            if (activeUser == user)
+                            if (activeUser.Id == user.Id)
                             {
                                 var newActiveUser = _chatHubCache.TopicsPerUser.Where(kv => kv.Value.Contains(topicId)).Select(async kv => await _usersService.GetUserById(kv.Key)).Select(t => t.GetAwaiter().GetResult()).Cast<User>().Order(new RandomComparer<User>()).FirstOrDefault(u => u.Id != user.Id);
                                 if (newActiveUser != null)
