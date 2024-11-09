@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.EntityFrameworkCore;
 using SignalRSwaggerGen.Attributes;
 using WorldviewShareServer.Models;
 using WorldviewShareServer.Services;
@@ -48,16 +49,39 @@ public class ChatHub : Hub<IChatClient>
             await Clients.Caller.RejectJoinSession("User not registered");
             return;
         }
+        topicSession.Users.Add(user);
+        _topicSessionsService.SetEntityState(topicSession, EntityState.Modified);
+        await _topicSessionsService.SaveChangesAsync();
         _activeUsers[topicSession] = user;
         await Groups.AddToGroupAsync(Context.ConnectionId, topicSession.Id.ToString());
         await Clients.Caller.AcceptJoinSession();
+    }
+    
+    public async Task LeaveSession()
+    {
+        if (!_users.TryGetValue(Context.ConnectionId, out var user))
+        {
+            await Clients.Caller.RejectLeaveSession("User not registered");
+            return;
+        }
+        foreach (var (topicSession, activeUser) in _activeUsers)
+        {
+            if (activeUser == user)
+            {
+                _activeUsers.Remove(topicSession);
+                await Groups.RemoveFromGroupAsync(Context.ConnectionId, topicSession.Id.ToString());
+                await Clients.Caller.AcceptLeaveSession();
+                return;
+            }
+        }
+        await Clients.Caller.RejectLeaveSession("User not in a session");
     }
 
     public async Task SendMessage(MessageRequestDto messageDto)
     {
         var message = _messagesService.ToMessage(messageDto);
         await _messagesService.SaveChangesAsync();
-        await Clients.All.ReceiveMessage(_messagesService.ToMessageResponseDto(message));
+        await Clients.Group(message.TopicSessionId.ToString()).ReceiveMessage(_messagesService.ToMessageResponseDto(message));
     }
     
     [SignalRHidden]
