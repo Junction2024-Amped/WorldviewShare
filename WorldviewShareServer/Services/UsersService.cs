@@ -1,8 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using WorldviewShareServer.Data;
-using WorldviewShareServer.Dtos;
 using WorldviewShareServer.Models;
+using WorldviewShareShared.DTO.Request.Users;
+using WorldviewShareShared.DTO.Response.Users;
 namespace WorldviewShareServer.Services;
 
 public class UsersService

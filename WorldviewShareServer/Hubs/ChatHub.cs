@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.SignalR;
-using WorldviewShareServer.Dtos;
 using WorldviewShareServer.Models;
 using WorldviewShareServer.Services;
+using WorldviewShareShared.DTO.Request.Messages;
 namespace WorldviewShareServer.Hubs;
 
 public class ChatHub : Hub

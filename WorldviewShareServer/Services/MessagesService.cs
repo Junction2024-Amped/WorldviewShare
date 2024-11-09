@@ -1,7 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using WorldviewShareServer.Data;
-using WorldviewShareServer.Dtos;
 using WorldviewShareServer.Models;
+using WorldviewShareShared.DTO.Request.Messages;
+using WorldviewShareShared.DTO.Response.Messages;
 namespace WorldviewShareServer.Services;
 
 public class MessagesService

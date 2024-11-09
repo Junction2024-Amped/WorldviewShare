@@ -1,7 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using WorldviewShareServer.Dtos;
 using WorldviewShareServer.Services;
+using WorldviewShareShared.DTO.Request.Users;
+using WorldviewShareShared.DTO.Response.Users;
 
 namespace WorldviewShareServer.Controllers
 {
