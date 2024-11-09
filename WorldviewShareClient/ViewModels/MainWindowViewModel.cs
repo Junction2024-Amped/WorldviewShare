@@ -32,6 +32,7 @@ public class MainWindowViewModel : ViewModelBase
     private int _currentContributions;
     private string _currentTopic;
     private Guid _currentTopicId = Guid.Empty;
+    private Guid _currentUserId;
     private bool _isCreateUserEnabled;
     private string _messageField;
     private ObservableCollection<MessageViewModel> _messages = new();
@@ -63,13 +64,21 @@ public class MainWindowViewModel : ViewModelBase
             .Build();
 
         connection.On<string>("RejectJoinSession", Console.WriteLine);
-        connection.On("AcceptJoinSession", () => Console.WriteLine("Accepted join session"));
+        connection.On<UserResponseDto>("AcceptJoinSession", userResponse =>
+        {
+            Console.WriteLine("Accepted join session");
+            CurrentActiveUser = userResponse.Id;
+        });
 
         connection.On<string>("RejectLeaveSession", Console.WriteLine);
-        connection.On("AcceptLeaveSession", () => Console.WriteLine("Accepted leave session"));
+        connection.On("AcceptLeaveSession", () => Console.WriteLine("Accept leave session"));
+
+        connection.On<UserResponseDto>("ChangeActiveUser", userResponse => { CurrentActiveUser = userResponse.Id; });
 
         connection.On<string>("RejectRegistration", Console.WriteLine);
         connection.On("AcceptRegistration", () => Console.WriteLine("Accepted registration"));
+
+        connection.On<string>("RejectMessage", Console.WriteLine);
 
         connection.StartAsync().Wait();
         connection.SendAsync("Register", new UserReferenceRequestDto(EnvironmentHelper.GetEnvironment().Id));
@@ -77,7 +86,6 @@ public class MainWindowViewModel : ViewModelBase
         Task.Factory.StartNew(async () => await ChangeTopic());
 
         var client = HttpClientFactory.GetClient();
-
 
         connection.On<MessageResponseDto>("ReceiveMessage", messageResponseDto =>
         {
@@ -106,6 +114,17 @@ public class MainWindowViewModel : ViewModelBase
         });
 
         Task.Delay(100).Wait();
+    }
+
+    public Guid CurrentActiveUser
+    {
+        get => _currentUserId;
+        set
+        {
+            _currentUserId = value;
+            if (value == EnvironmentHelper.GetEnvironment().Id && _currentContributions < 5)
+                CanSendMessage = true;
+        }
     }
 
     public ObservableCollection<MessageViewModel> Messages
@@ -308,7 +327,7 @@ public class MainWindowViewModel : ViewModelBase
 
     private async void SendMessage()
     {
-        if (SourceUri != string.Empty)
+        if (SourceUri != null && SourceUri != string.Empty)
             await connection.SendAsync("SendMessage",
                 new MessageRequestDto(MessageField, new Uri(SourceUri), _currentTopicId,
                     EnvironmentHelper.GetEnvironment().Id));
@@ -319,6 +338,6 @@ public class MainWindowViewModel : ViewModelBase
         MessageField = string.Empty;
         CanChangeTopic = true;
         _currentContributions++;
-        if (_currentContributions == 5) CanSendMessage = false;
+        CanSendMessage = false;
     }
 }

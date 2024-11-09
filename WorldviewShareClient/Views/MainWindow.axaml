@@ -21,7 +21,7 @@
         <Grid ColumnDefinitions="*, 100">
             <StackPanel Grid.Column="1"
                         Orientation="Vertical">
-                <Button IsEnabled="{Binding Path=isCreateUserEnabled}"
+                <Button IsVisible="{Binding Path=isCreateUserEnabled}"
                         Content="{Binding Path=UserName}"
                         Command="{Binding CreateUserCommand}" />
                 <TextBox IsVisible="{Binding isCreateUserEnabled}"
@@ -41,7 +41,7 @@
                            Foreground="Black"
                            Text="{Binding CurrentTopic}" />
             </Border>
-            <ScrollViewer MaxHeight="840">
+            <ScrollViewer MaxHeight="900">
                 <ItemsControl ItemsSource="{Binding Messages, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}">
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
