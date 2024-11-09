@@ -26,7 +26,7 @@ namespace WorldviewShareServer.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<TopicSessionResponseDto>>> GetTopicSessions()
         {
-            return (await _topicSessionsService.GetTopicSessions()).Select(ts => _topicSessionsService.ToTopicSessionResponseDto(ts)).ToList();
+            return (await _topicSessionsService.GetTopicSessions()).Where(ts => !ts.Archived).Select(ts => _topicSessionsService.ToTopicSessionResponseDto(ts)).ToList();
         }
 
         [HttpGet("{id}")]
@@ -93,6 +93,20 @@ namespace WorldviewShareServer.Controllers
             await _topicSessionsService.SaveChangesAsync();
 
             return CreatedAtAction("GetTopicSession", new { id = topicSession.Id }, _topicSessionsService.ToTopicSessionResponseDto(topicSession));
+        }
+        
+        [HttpPost("{id}/status")]
+        public async Task<IActionResult> SetTopicSessionStatus(Guid id, TopicSessionStatusRequestDto statusDto)
+        {
+            var topicSession = await _topicSessionsService.GetTopicSessionById(id);
+            if (topicSession == null)
+            {
+                return NotFound();
+            }
+            topicSession.Archived = statusDto.Archived;
+            _topicSessionsService.SetEntityState(topicSession, EntityState.Modified);
+            await _topicSessionsService.SaveChangesAsync();
+            return NoContent();
         }
         
         [HttpPatch("{id}")]

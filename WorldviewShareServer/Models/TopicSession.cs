@@ -7,4 +7,5 @@ public class TopicSession
     public string Topic { get; set; } = "";
     public List<User> Users { get; set; } = [];
     public List<Message> Messages { get; set; } = [];
+    public bool Archived { get; set; }
 }
