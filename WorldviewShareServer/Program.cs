@@ -19,11 +19,9 @@ public class Program
             options.SupportNonNullableReferenceTypes();
         });
         
-        SqliteConnection connection = new("DataSource=file::memory:?cache=shared"); // TODO: remove once switch to persistent DB happens
-        connection.Open();
         builder.Services.AddDbContext<WorldviewShareContext>(options =>
         {
-            options.UseSqlite(connection);
+            options.UseSqlite(@"Data Source=Data/WorldviewShareData.db");
         });
         
         builder.Services.AddControllers();
@@ -44,7 +42,5 @@ public class Program
         app.MapControllers();
         
         app.Run();
-        
-        connection.Close();
     }
 }
