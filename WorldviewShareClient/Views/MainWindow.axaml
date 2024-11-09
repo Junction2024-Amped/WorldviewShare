@@ -17,7 +17,7 @@
         <vm:MainWindowViewModel />
     </Design.DataContext>
 
-    <Grid RowDefinitions="Auto, *">
+    <Grid RowDefinitions="Auto, *, Auto">
         <Grid ColumnDefinitions="*, 100">
             <StackPanel Grid.Column="1"
                         Orientation="Vertical">
@@ -30,23 +30,50 @@
         </Grid>
         <StackPanel Grid.Row="1"
                     Orientation="Vertical">
-            <TextBlock x:Name="CurrentTopic"
-                       Text="{Binding CurrentTopic}" />
-            <ScrollViewer>
+            <Border CornerRadius="10"
+                    BorderThickness="2"
+                    BorderBrush="Azure"
+                    Background="Azure"
+                    Width="500"
+                    Margin="10">
+                <TextBlock x:Name="CurrentTopic"
+                           Margin="5"
+                           Foreground="Black"
+                           Text="{Binding CurrentTopic}" />
+            </Border>
+            <ScrollViewer MaxHeight="800">
                 <ItemsControl ItemsSource="{Binding Messages}">
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
-                            <Border CornerRadius="25"
-                                    BorderThickness="2">
-                                <StackPanel Orientation="Vertical">
-                                    <TextBlock Text="{Binding Name}" />
-                                    <TextBlock Text="{Binding Message}" />
+                            <Border CornerRadius="10"
+                                    BorderThickness="2"
+                                    BorderBrush="Azure"
+                                    Background="Azure"
+                                    Width="500"
+                                    Margin="10">
+                                <StackPanel Orientation="Vertical"
+                                            Margin="5">
+                                    <TextBlock Foreground="Black"
+                                               Text="{Binding Name}" />
+                                    <TextBlock Foreground="Black"
+                                               Text="{Binding Message}" />
                                 </StackPanel>
                             </Border>
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
             </ScrollViewer>
+        </StackPanel>
+        <StackPanel Grid.Row="2"
+                    Orientation="Horizontal">
+            <TextBox Text="{Binding MessageField}"
+                     Width="200"
+                     HorizontalAlignment="Left"
+                     TextWrapping="Wrap" />
+            <Button IsDefault="True"
+                    Content="Send message"
+                    Command="{Binding SendMessageCommand}"
+                    HorizontalAlignment="Right" />
         </StackPanel>
     </Grid>
 </Window>
