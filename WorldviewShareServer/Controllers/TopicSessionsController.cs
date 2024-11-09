@@ -28,6 +28,29 @@ namespace WorldviewShareServer.Controllers
         {
             return (await _topicSessionsService.GetTopicSessions()).Where(ts => !ts.Archived).Select(ts => _topicSessionsService.ToTopicSessionResponseDto(ts)).ToList();
         }
+        
+        [HttpGet("random")]
+        public async Task<ActionResult<TopicSessionResponseDto>> GetRandomTopicSession()
+        {
+            var topicSessions = (await _topicSessionsService.GetTopicSessions()).Where(ts => !ts.Archived).ToList();
+            var totalUsers = topicSessions.Sum(ts => ts.Users.Count);
+            var random = new Random().Next(totalUsers);
+            var sum = 0;
+            foreach (var topicSession in topicSessions)
+            {
+                var invertedCount = Math.Abs(totalUsers - sum);
+                sum += invertedCount;
+                if (sum >= random)
+                {
+                    return _topicSessionsService.ToTopicSessionResponseDto(topicSession);
+                }
+            }
+            if (topicSessions.Count > 0)
+            {
+                return _topicSessionsService.ToTopicSessionResponseDto(topicSessions.Last());
+            }
+            return NotFound();
+        }
 
         [HttpGet("{id}")]
         public async Task<ActionResult<TopicSessionResponseDto>> GetTopicSession(Guid id)
