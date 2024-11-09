@@ -5,6 +5,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Text;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using CommunityToolkit.Mvvm.Input;
@@ -341,7 +342,8 @@ public class MainWindowViewModel : ViewModelBase
     {
         if (MessageField == string.Empty) return;
 
-        if (SourceUri != null && SourceUri != string.Empty)
+        if (SourceUri != null && SourceUri != string.Empty &&
+            Regex.IsMatch(SourceUri, @"http(s)?://([\w-]+\.)+[\w-]+(/[\w- ./?%&=]*)?"))
             await connection.SendAsync("SendMessage",
                 new MessageRequestDto(MessageField, new Uri(SourceUri), _currentTopicId,
                     EnvironmentHelper.GetEnvironment().Id));
