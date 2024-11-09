@@ -26,6 +26,7 @@ public static class Program
         
         builder.Services.AddSignalR();
         
+        builder.Services.AddScoped<UsersService>();
         builder.Services.AddScoped<MessagesService>();
         
         builder.Services.AddControllers();

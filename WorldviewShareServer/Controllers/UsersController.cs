@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using WorldviewShareServer.Data;
 using WorldviewShareServer.Dtos;
 using WorldviewShareServer.Models;
+using WorldviewShareServer.Services;
 
 namespace WorldviewShareServer.Controllers
 {
@@ -10,65 +11,51 @@ namespace WorldviewShareServer.Controllers
     [ApiController]
     public class UsersController : ControllerBase
     {
-        private readonly WorldviewShareContext _context;
+        private readonly UsersService _service;
 
-        public UsersController(WorldviewShareContext context)
+        public UsersController(UsersService service)
         {
-            _context = context;
+            _service = service;
         }
         
-        private User ToUser(UserRequestDto userRequestDto)
-        {
-            var user = new User
-            {
-                Username = userRequestDto.Username
-            };
-            _context.Users.Add(user);
-            return user;
-        }
-        
-        private async Task<User?> GetUserById(Guid id) => await _context.Users.FindAsync(id);
-        
-        private static UserResponseDto ToUserResponseDto(User user) => new(user.Id, user.Username, user.TopicSessions.Select(ts => ts.Id).ToList());
-
         [HttpGet]
         public async Task<ActionResult<IEnumerable<UserResponseDto>>> GetUsers()
         {
-            return await _context.Users.Select(u => ToUserResponseDto(u)).ToListAsync();
+            return (await _service.GetUsers()).Select(u => _service.ToUserResponseDto(u)).ToList();
         }
 
         [HttpGet("{id}")]
         public async Task<ActionResult<UserResponseDto>> GetUser(Guid id)
         {
-            var user = await GetUserById(id);
+            var user = await _service.GetUserById(id);
 
             if (user == null)
             {
                 return NotFound();
             }
 
-            return ToUserResponseDto(user);
+            return _service.ToUserResponseDto(user);
         }
 
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
         public async Task<IActionResult> PutUser(Guid id, UserRequestDto userDto)
         {
-            var user = await GetUserById(id);
+            var user = await _service.GetUserById(id);
             if (user == null)
             {
                 return NotFound();
             }
             user.Username = userDto.Username;
-            _context.Entry(user).State = EntityState.Modified;
+            _service.SetEntityState(user, EntityState.Modified);
 
             try
             {
-                await _context.SaveChangesAsync();
+                await _service.SaveChangesAsync();
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!UserExists(id))
+                if (!_service.UserExists(id))
                 {
                     return NotFound();
                 }
@@ -85,30 +72,25 @@ namespace WorldviewShareServer.Controllers
         [HttpPost]
         public async Task<ActionResult<UserResponseDto>> PostUser(UserRequestDto userDto)
         {
-            var user = ToUser(userDto);
-            await _context.SaveChangesAsync();
+            var user =_service.ToUser(userDto);
+            await _service.SaveChangesAsync();
 
-            return CreatedAtAction("GetUser", new { id = user.Id }, ToUserResponseDto(user));
+            return CreatedAtAction("GetUser", new { id = user.Id }, _service.ToUserResponseDto(user));
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteUser(Guid id)
         {
-            var user = await GetUserById(id);
+            var user = await _service.GetUserById(id);
             if (user == null)
             {
                 return NotFound();
             }
 
-            _context.Users.Remove(user);
-            await _context.SaveChangesAsync();
+            _service.RemoveUser(user);
+            await _service.SaveChangesAsync();
 
             return NoContent();
-        }
-
-        private bool UserExists(Guid id)
-        {
-            return _context.Users.Any(e => e.Id == id);
         }
     }
 }
