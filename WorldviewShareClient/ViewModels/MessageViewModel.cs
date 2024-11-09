@@ -1,5 +1,7 @@
 using System;
 using System.Windows.Input;
+using CommunityToolkit.Mvvm.Input;
+using WorldviewShareClient.Views;
 
 namespace WorldviewShareClient.ViewModels;
 
@@ -9,6 +11,22 @@ public class MessageViewModel : ViewModelBase
     private string _name;
     private bool _showSource;
     private Uri? _source;
+
+    public MessageViewModel()
+    {
+        HandleLinkCommand = new RelayCommand(async () =>
+        {
+            var launcher = MainWindow.Instance.Launcher;
+            if (_source != null)
+            {
+                await launcher.LaunchUriAsync(_source);
+            }
+            else
+            {
+                throw new InvalidOperationException("Source is null");
+            }
+        });
+    }
 
     public string Message
     {
