@@ -17,7 +17,8 @@
         <vm:MainWindowViewModel />
     </Design.DataContext>
 
-    <Grid RowDefinitions="Auto, *, Auto">
+    <Grid RowDefinitions="Auto, *, Auto"
+          Background="Black">
         <Grid ColumnDefinitions="*, 100">
             <StackPanel Grid.Column="1"
                         Orientation="Vertical">
