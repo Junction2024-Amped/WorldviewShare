@@ -112,7 +112,8 @@ namespace WorldviewShareServer.Controllers
                 return NotFound();
             }
 
-            _topicSessionsService.RemoveTopicSession(topicSession);
+            topicSession.Archived = true;
+            _topicSessionsService.SetEntityState(topicSession, EntityState.Modified);
             await _topicSessionsService.SaveChangesAsync();
 
             return NoContent();
